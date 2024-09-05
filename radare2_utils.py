@@ -53,19 +53,24 @@ class R2Helper:
             for one in r2.cmdj('aflj'):
                 func_offset_list.append((one['offset'],one['name']))
                 addr2name[one['offset']] = one['name']
+            print(len(func_offset_list))
             
             # 遍历函数首地址，记录被调用情况
             addr2called = {}
             for offset, func_name in func_offset_list:
                 r2.cmd("s 0x{0:x}".format(offset))
                 cg = r2.cmdj('afxj')
+                visited = []
                 for reference in cg:
                     if reference['type'] == 'CALL':
+                        fromto = (reference['from'], reference['to'])
+                        if fromto in visited: continue
+                        else: visited.append(fromto)
                         called = reference['to']
                         if addr2called.get(called):
-                            addr2called[called] += 1
+                            addr2called[called].append(offset)
                         else:
-                            addr2called[called] = 1
+                            addr2called[called] = [offset]
 
             # 遍历函数首地址，获取指令地址
             for offset, func_name in func_offset_list:
@@ -79,15 +84,21 @@ class R2Helper:
                 argsNum = len(callArgs['reg'])
 
                 # 函数的调用和被调用
+                called = []
+                call = []
                 if addr2called.get(offset):
-                    calledNum = addr2called[offset]
-                else:
-                    calledNum = 0
+                    for addr in addr2called[offset]:
+                        if addr2name.get(addr):
+                            called.append(addr2name[addr])
                 cg = r2.cmdj('afxj')
-                callNum = 0
+                visited = []
                 for reference in cg:
                     if reference['type'] == 'CALL':
-                        callNum += 1             
+                        fromto = (reference['from'], reference['to'])
+                        if fromto in visited: continue
+                        else: visited.append(fromto)
+                        if addr2name.get(reference['to']):
+                            call.append(addr2name[reference['to']])       
 
                 # 切割基本快
                 for i, one in enumerate(afb):
@@ -115,8 +126,8 @@ class R2Helper:
                     'pdf': pdf,
                     'offset': offset,
                     'argsNum': argsNum,
-                    'calledNum': calledNum,
-                    'callNum': callNum
+                    'called': called,
+                    'call': call
                 })
         return res
 

@@ -1,5 +1,5 @@
 import networkx as nx
-
+import itertools
 
 class raw_graph:
     def __init__(self, funcname, g, func_f):

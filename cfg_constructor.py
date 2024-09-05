@@ -28,12 +28,14 @@ def get_cfg(func):
         cfg.nodes[node1]['suc'].append(node2)
         cfg.nodes[node2]['pre'].append(node1)
     
-    cfg = attributingRe(cfg)
+    cfg = attributingRe(cfg, func)
 
     return cfg
         
 
-def attributingRe(cfg):  # 为每个基本块生成自定义的属性
+def attributingRe(cfg, func):  # 为每个基本块生成自定义的属性
+    call = func['call'].copy()
+    call.reverse()
     for node_id in cfg:
         bl = cfg.nodes[node_id]['label']
         numIns = calInsts(bl)  # No. of Instruction
@@ -48,7 +50,7 @@ def attributingRe(cfg):  # 为每个基本块生成自定义的属性
         cfg.nodes[node_id]['numNc'] = len(strings) + len(consts)
         cfg.nodes[node_id]['consts'] = consts
         cfg.nodes[node_id]['strings'] = strings
-        externs = retrieveExterns(bl, ea_externs)
+        externs = retrieveExterns(bl, call)
         cfg.nodes[node_id]['externs'] = externs
         numTIs = calTransferIns(bl)  # No. of Transfer Instruction
         cfg.nodes[node_id]['numTIs'] = numTIs

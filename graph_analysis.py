@@ -2,7 +2,7 @@ import networkx as nx
 
 # No. of calls
 def getFuncCalls(func):
-    return func['callNum']
+    return len(func['call'])
 
 def calCalls(block):
     calls = {'call': 1, 'jal': 1, 'jalr': 1, 'bl': 1, 'blx': 1, 'bx': 1, 'BL': 1, 'BLX': 1, 'BX': 1}
@@ -113,7 +113,7 @@ def getLocalVariables(func):
 
 # No. of being called
 def getIncommingCalls(func):
-    return func['calledNum']
+    return len(func['called'])
 
 # constants
 def getfunc_consts(cfg):
@@ -172,3 +172,18 @@ def calArithmeticIns(bl):
             invoke_num += 1
 
     return invoke_num
+
+def retrieveExterns(bl, call):
+    externs = []
+    for ins in bl:
+        if call == []: break
+        extern = call[-1]
+        if extern in ins:
+            externs.append(extern)
+            call.remove(call[-1])
+        # for extern in call:
+        #     if extern in ins:
+        #         externs.append(extern)
+        #         call.remove(extern)
+        #         break
+    return externs
