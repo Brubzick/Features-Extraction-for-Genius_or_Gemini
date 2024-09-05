@@ -87,9 +87,7 @@ class R2Helper:
                 callNum = 0
                 for reference in cg:
                     if reference['type'] == 'CALL':
-                        callNum += 1
-
-                print(afb)                
+                        callNum += 1             
 
                 # 切割基本快
                 for i, one in enumerate(afb):
