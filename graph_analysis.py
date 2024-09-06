@@ -180,7 +180,7 @@ def retrieveExterns(bl, call):
         extern = call[-1]
         if extern in ins:
             externs.append(extern)
-            call.remove(call[-1])
+            call.pop()
         # for extern in call:
         #     if extern in ins:
         #         externs.append(extern)

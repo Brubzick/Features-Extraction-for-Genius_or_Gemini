@@ -20,8 +20,10 @@ def get_cfg(func):
         cfg.nodes[node_id]['label'] = block
         cfg.nodes[node_id]['suc'] = []
         cfg.nodes[node_id]['pre'] = []
-
+    
     for edge in func['edges']:
+        if (addr2node_id.get(edge[0]) == None or addr2node_id.get(edge[1]) == None):
+            continue
         node1 = addr2node_id[edge[0]]
         node2 = addr2node_id[edge[1]]
         cfg.add_edge(node1, node2)

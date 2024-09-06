@@ -50,13 +50,10 @@ class R2Helper:
             # 记录所有函数首地址
             addr2name = {}
             func_offset_list = []
-            r2.cmd('afr')
             for one in r2.cmdj('aflj'):
                 func_offset_list.append((one['offset'],one['name']))
                 addr2name[one['offset']] = one['name']
             
-            arch = r2.cmd('-a')
-     
             # 遍历函数首地址，记录被调用情况
             addr2called = {}
             for offset, func_name in func_offset_list:
@@ -132,8 +129,18 @@ class R2Helper:
                     'offset': offset,
                     'argsNum': argsNum,
                     'called': called,
-                    'call': call,
+                    'call': call
                 })
         return res
 
+if __name__ == '__main__':
+    r2 = R2Helper('./data/dfs_gcc2_O0')
+    res = r2.calc_cfg_info()
+    for func in res:
+        index = 0
+        for bb in func['bb_addr_list']:
+            for ins in bb[1]:
+                print(func['pdf']['ops'][index]['disasm'],func['pdf']['ops'][index]['offset']==ins)
+                index += 1
+            print('=================================')
 
