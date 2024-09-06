@@ -64,7 +64,7 @@ class R2Helper:
                 cg = r2.cmdj('afxj')
                 visited = []
                 for reference in cg:
-                    if reference['type'] == 'CALL':
+                    if (reference['type'] == 'CALL') or (reference['type'] == 'CODE'):
                         fromto = (reference['from'], reference['to'])
                         if fromto in visited:
                             continue
@@ -95,15 +95,21 @@ class R2Helper:
                     for addr in addr2called[offset]:
                         if addr2name.get(addr):
                             called.append(addr2name[addr])
+                        else:
+                            called.append(addr)
                 cg = r2.cmdj('afxj')
                 visited = []
                 for reference in cg:
                     if reference['type'] == 'CALL':
                         fromto = (reference['from'], reference['to'])
-                        if fromto in visited: continue
-                        else: visited.append(fromto)
+                        if fromto in visited:
+                            continue
+                        else:
+                            visited.append(fromto)
                         if addr2name.get(reference['to']):
-                            call.append(addr2name[reference['to']])       
+                            call.append(addr2name[reference['to']])   
+                        else:    
+                            call.append(reference['to'])
 
                 # 切割基本快
                 for i, one in enumerate(afb):
@@ -134,6 +140,6 @@ class R2Helper:
                     'called': called,
                     'call': call,
                 })
-        return res
+        return res, arch[0:-1]
 
 

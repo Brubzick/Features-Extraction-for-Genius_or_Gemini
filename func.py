@@ -8,14 +8,14 @@ def get_func_cfgs_c(filePath, fileName):
 
     ins = R2Helper(filePath)
 
-    res = ins.calc_cfg_info()
+    res, arch = ins.calc_cfg_info()
 
     raw_cfgs = raw_graphs(fileName)
 
     for func in res:
         func_name = func['func_name']
-        cfg = get_cfg(func)
-        func_f = get_discoverRe_feature(func, cfg)
+        cfg = get_cfg(func, arch)
+        func_f = get_discoverRe_feature(func, cfg, arch)
         raw_g = raw_graph(func_name, cfg, func_f)
         raw_cfgs.append(raw_g)
 
