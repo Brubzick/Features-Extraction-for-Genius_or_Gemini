@@ -138,7 +138,7 @@ class R2Helper:
                     'offset': offset,
                     'argsNum': argsNum,
                     'called': called,
-                    'call': call,
+                    'call': call
                 })
         return res, arch[0:-1]
 

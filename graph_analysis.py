@@ -125,21 +125,25 @@ def getfunc_consts(cfg,arch):
     consts = []
     for node in cfg.nodes:
         block = cfg.nodes[node]['label']
-        strs, cons = getBBconsts(block, arch)
+        opcode = cfg.nodes[node]['opcode']
+        strs = getBBstrings(block, arch)
+        cons = getBBconsts(opcode, arch)
         strings += strs
         consts += cons
     
     return strings, consts
 
-def getBBconsts(block, arch):
+def getBBstrings(block, arch):
     if arch == 'x86':
-        calls = ['jmp', 'jz', 'jnz', 'js', 'je', 'jne', 'jg', 'jle', 'jge', 'ja', 'jnc', 'call', 'mov']
+        calls = ['jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
+                'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
+                'call','mov']
     elif arch == 'arm':
         calls = ['ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx', 'BL', 'B', 'BX', 'BLX']
     else:
         calls = ['la', 'jalr', 'call', 'jal']
+
     strings = []
-    consts = []
     for ins in block:
         ins = ins.split()
         if ins[0] in calls:
@@ -147,20 +151,38 @@ def getBBconsts(block, arch):
         for op in ins:
             if op.startswith('str.'):
                 strings.append(op[4:])
-            else:
-                if op[-1] == ',':
-                    op = op[:-1]
-                if op.isdigit():
-                    consts.append(int(op))
-                elif op.startswith('0x'):
-                    op = op[2:]
-                    try:
-                        con = int(op,16)
-                        consts.append(con)
-                    except:
-                        pass
     
-    return strings, consts
+    return strings
+
+def getBBconsts(opcode, arch):
+    if arch == 'x86':
+        calls = ['jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
+                'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
+                'call','mov']
+    elif arch == 'arm':
+        calls = ['ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx', 'BL', 'B', 'BX', 'BLX']
+    else:
+        calls = ['la', 'jalr', 'call', 'jal']
+
+    consts = []
+    for ins in opcode:
+        ins = ins.split()
+        if ins[0] in calls:
+            continue
+        for op in ins:
+            if op[-1] == ',':
+                op = op[:-1]
+            if op.isdigit():
+                consts.append(int(op))
+            elif op.startswith('0x'):
+                op = op[2:]
+                try:
+                    con = int(op,16)
+                    consts.append(con)
+                except:
+                    pass
+    
+    return consts
         
 def calArithmeticIns(bl,arch):
     # 定义各架构中的算术指令

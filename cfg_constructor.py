@@ -11,13 +11,16 @@ def get_cfg(func, arch):
         addr2node_id[bb[0]] = node_id
         ops = func['pdf']['ops']
         block = []
+        opcode = []
         for addr in bb[1]:
             if addr == ops[opcodeIndex]['offset']:
                 block.append(ops[opcodeIndex]['disasm'])
+                opcode.append(ops[opcodeIndex]['opcode'])
             opcodeIndex += 1
         cfg.nodes[node_id]['addr'] = bb[0]
         cfg.nodes[node_id]['ins_addr_list'] = bb[1]
         cfg.nodes[node_id]['label'] = block
+        cfg.nodes[node_id]['opcode'] = opcode
         cfg.nodes[node_id]['suc'] = []
         cfg.nodes[node_id]['pre'] = []
     
@@ -40,6 +43,7 @@ def attributingRe(cfg, func, arch):  # 为每个基本块生成自定义的属�
     call.reverse()
     for node_id in cfg:
         bl = cfg.nodes[node_id]['label']
+        op = cfg.nodes[node_id]['opcode']
         numIns = calInsts(bl)  # No. of Instruction
         cfg.nodes[node_id]['numIns'] = numIns
         numCalls = calCalls(bl,arch)  # No. of Calls
@@ -48,7 +52,8 @@ def attributingRe(cfg, func, arch):  # 为每个基本块生成自定义的属�
         cfg.nodes[node_id]['numLIs'] = numLIs
         numAs = calArithmeticIns(bl,arch)  # No. of Arithmetic Instructions
         cfg.nodes[node_id]['numAs'] = numAs
-        strings, consts = getBBconsts(bl,arch)  # String and numeric constants
+        strings = getBBstrings(bl,arch)  # String and numeric constants
+        consts = getBBconsts(op,arch)
         cfg.nodes[node_id]['numNc'] = len(strings) + len(consts)
         cfg.nodes[node_id]['consts'] = consts
         cfg.nodes[node_id]['strings'] = strings
