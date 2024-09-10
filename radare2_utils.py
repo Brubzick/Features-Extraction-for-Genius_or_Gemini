@@ -58,7 +58,7 @@ class R2Helper:
             arch = r2.cmd('-a')
             arch = arch[0:-1]
             if arch!='x86' and arch!='arm':
-                print('The arch is not well supported.')
+                print('The arch is not well supported!!!')
      
             # 遍历函数首地址，记录被调用情况
             addr2called = {}

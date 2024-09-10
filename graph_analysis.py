@@ -137,7 +137,7 @@ def getBBstrings(block, arch):
     if arch == 'x86':
         calls = ['jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
                 'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
-                'call','mov']
+                'jmp','call','mov']
     elif arch == 'arm':
         calls = ['ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx', 'BL', 'B', 'BX', 'BLX']
     else:
@@ -158,7 +158,7 @@ def getBBconsts(opcode, arch):
     if arch == 'x86':
         calls = ['jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
                 'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
-                'call','mov']
+                'jmp','call','mov']
     elif arch == 'arm':
         calls = ['ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx', 'BL', 'B', 'BX', 'BLX']
     else:
