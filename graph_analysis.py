@@ -210,9 +210,4 @@ def retrieveExterns(bl, call):
         if extern in ins:
             externs.append(extern)
             call.pop()
-        # for extern in call:
-        #     if extern in ins:
-        #         externs.append(extern)
-        #         call.remove(extern)
-        #         break
     return externs

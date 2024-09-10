@@ -78,6 +78,7 @@ class R2Helper:
 
             # 遍历函数首地址，获取指令地址
             for offset, func_name in func_offset_list:
+                f_name = func_name.replace('sym.imp.', '').replace('sym.', '').replace('dbg.', '')
                 r2.cmd("s 0x{0:x}".format(offset))
                 pdf = r2.cmdj("pdfj")
                 cmd_addr_list = [one['offset'] for one in pdf['ops']]
@@ -109,7 +110,7 @@ class R2Helper:
                         if addr2name.get(reference['to']):
                             call.append(addr2name[reference['to']])   
                         else:    
-                            call.append(reference['to'])
+                            call.append(str(reference['to']))
 
                 # 切割基本快
                 for i, one in enumerate(afb):
@@ -133,7 +134,7 @@ class R2Helper:
                     # 'cmd_addr_list': cmd_addr_list,
                     'bb_addr_list': bb_addr_list,
                     'edges': edges,
-                    'func_name': func_name,
+                    'func_name': f_name,
                     'pdf': pdf,
                     'offset': offset,
                     'argsNum': argsNum,

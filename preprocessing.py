@@ -23,23 +23,23 @@ if __name__ == '__main__':
 	# 		for node in cfg.g:
 	# 			print(cfg.g.nodes[node]['v'])
 
-	# with open('./reference/example.cfg', 'rb') as f:
+	# with open('./data/dfs_gcc_O0.cfg', 'rb') as f:
 	# 	cfgs2 = pickle.load(f)
 
 	# print(len(cfgs.raw_graph_list))
 	# for cfg in cfgs.raw_graph_list:
 	# 	print(cfg.funcname)
 	# 	print(cfg.discovre_features)
-		# for node in cfg.old_g:
-		# 	print(cfg.old_g.nodes[node]['opcode'])
+	# 	for node in cfg.old_g:
+	# 		print(cfg.old_g.nodes[node]['label'])
+	# 		print(len(cfg.old_g.nodes[node]['externs']))
+	# 		print(cfg.old_g.nodes[node]['numCalls'])
 	# print('================================')
-	# for cfg in cfgs2.raw_graph_list:
-	# 	if cfg.funcname == '_start':
-	# 		for node in cfg.g:
-	# 			print(cfg.g.nodes[node]['v'])
-	# print(len(cfgs2.raw_graph_list))
 	# for cfg in cfgs2.raw_graph_list:
 	# 	print(cfg.funcname)
 	# 	print(cfg.discovre_features)
-
+	# 	for node in cfg.old_g:
+	# 		print(cfg.old_g.nodes[node]['label'])
+	# 		print(len(cfg.old_g.nodes[node]['externs']))
+	# 		print(cfg.old_g.nodes[node]['numCalls'])
 
