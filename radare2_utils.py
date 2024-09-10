@@ -56,6 +56,9 @@ class R2Helper:
                 addr2name[one['offset']] = one['name']
             
             arch = r2.cmd('-a')
+            arch = arch[0:-1]
+            if arch!='x86' and arch!='arm':
+                print('The arch is not well supported.')
      
             # 遍历函数首地址，记录被调用情况
             addr2called = {}
@@ -141,6 +144,6 @@ class R2Helper:
                     'called': called,
                     'call': call
                 })
-        return res, arch[0:-1]
+        return res, arch
 
 
