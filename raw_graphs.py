@@ -1,5 +1,7 @@
 import networkx as nx
 import itertools
+import sys
+sys.setrecursionlimit(10000)
 
 class raw_graph:
     def __init__(self, funcname, g, func_f):
@@ -44,6 +46,7 @@ class raw_graph:
             if suc not in offsprings:
                 offsprings[suc] = 1
                 self.getOffsprings(g, suc, offsprings)
+
 
     def retrieveVec(self, id_, g):
         feature_vec = []

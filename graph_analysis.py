@@ -13,7 +13,7 @@ def calCalls(block, arch):
     if arch == 'x86':
         calls = {'call': 1}
     elif arch == 'arm':
-        calls = {'bl': 1, 'blx': 1, 'bx': 1, 'BL': 1, 'BLX': 1, 'BX': 1}
+        calls = {'bl': 1, 'blx': 1, 'bx': 1}
     else:
         calls = {'jal': 1, 'jalr': 1}
 
@@ -39,8 +39,7 @@ def calLogicInstructions(bl, arch):
         calls = {'and': 1, 'andn': 1, 'andnpd': 1, 'andpd': 1, 'andps': 1, 'andnps': 1, 'test': 1, 'xor': 1, 'xorpd': 1,
                 'pslld': 1}
     elif arch == 'arm':
-        calls = {'and': 1, 'orr': 1, 'eor': 1, 'bic': 1, 'mvn': 1, 'tst': 1, 'teq': 1, 'cmp': 1, 'cmn': 1,
-                 'AND': 1, 'ORR': 1, 'EOR': 1, 'BIC': 1, 'MVN': 1, 'TST': 1, 'TEQ': 1, 'CMP': 1, 'CMN': 1}
+        calls = {'and': 1, 'orr': 1, 'eor': 1, 'bic': 1, 'mvn': 1, 'tst': 1, 'teq': 1, 'cmp': 1, 'cmn': 1}
     else:
         calls = {'and': 1, 'andi': 1, 'or': 1, 'ori': 1, 'xor': 1, 'nor': 1, 'slt': 1, 'slti': 1, 'sltu': 1}
 
@@ -66,7 +65,7 @@ def calTransferIns(bl, arch):
         calls = {'jmp': 1, 'jz': 1, 'jnz': 1, 'js': 1, 'je': 1, 'jne': 1, 'jg': 1, 'jle': 1, 'jge': 1, 'ja': 1, 'jnc': 1,
                 'call': 1}
     elif arch == 'arm':
-        calls = {'MVN': 1, "MOV": 1, 'mvn': 1, "mov": 1}
+        calls = {'mvn': 1, "mov": 1}
     else:
         calls = {'beq': 1, 'bne': 1, 'bgtz': 1, "bltz": 1, "bgez": 1, "blez": 1, 'j': 1, 'jal': 1, 'jr': 1, 'jalr': 1}
 
@@ -85,13 +84,13 @@ def getBasicBlocks(cfg):
 
 # Between
 def retrieveGP(g):
-	bf = betweeness(g)
-	#close = closeness_centrality(g)
-	#bf_sim = 
-	#close_sim = 
-	x = sorted(bf.values())
-	value = sum(x)/len(x)
-	return round(value,5)
+    bf = betweeness(g)
+    x = sorted(bf.values())
+    if len(x) == 0:
+        value = sum(x)
+    else:
+        value = sum(x)/len(x)
+    return round(value,5)
 
 def betweeness(g):
 	#pdb.set_trace()
@@ -139,7 +138,11 @@ def getBBstrings(block, arch):
                 'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
                 'jmp','call','mov']
     elif arch == 'arm':
-        calls = ['ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx', 'BL', 'B', 'BX', 'BLX']
+        calls = ['beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
+                 'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
+                 'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
+                 'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
+                 'str', 'mov', 'bl', 'b', 'bx', 'blx']
     else:
         calls = ['la', 'jalr', 'call', 'jal']
 
@@ -160,7 +163,12 @@ def getBBconsts(opcode, arch):
                 'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
                 'jmp','call','mov']
     elif arch == 'arm':
-        calls = ['ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx', 'BL', 'B', 'BX', 'BLX']
+        calls = ['beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
+                 'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
+                 'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
+                 'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
+                 'moveq','movne','movcs','movcc','movmi','movpl','movvs','movvc','movhi','movls','movge','movlt','movgt','movle','moval',
+                 'ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx']
     else:
         calls = ['la', 'jalr', 'call', 'jal']
 
@@ -189,8 +197,7 @@ def calArithmeticIns(bl,arch):
     if arch == 'x86':
         calls = {'add': 1, 'sub': 1, 'div': 1, 'imul': 1, 'idiv': 1, 'mul': 1, 'shl': 1, 'dec': 1, 'inc': 1}
     elif arch == 'arm':
-        calls = {'ADD': 1, 'SUB': 1, 'MUL': 1, 'MLA': 1, 'MLS': 1, 'SDIV': 1, 'UDIV': 1, 'RSB': 1, 'RSC': 1,
-                 'add': 1, 'sub': 1, 'mul': 1, 'mla': 1, 'mls': 1, 'sdiv': 1, 'udiv': 1, 'rsb': 1, 'rsc': 1}  # ARM 架构中的算术指令
+        calls = {'add': 1, 'sub': 1, 'mul': 1, 'mla': 1, 'mls': 1, 'sdiv': 1, 'udiv': 1, 'rsb': 1, 'rsc': 1}  # ARM 架构中的算术指令
     else:
         calls = {'add': 1, 'addu': 1, 'addi': 1, 'addiu': 1, 'mult': 1, 'multu': 1, 'div': 1, 'divu': 1}
 
