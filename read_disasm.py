@@ -43,10 +43,14 @@ def ReadDisasm(disasmPath, arch):
                 lines.append(line[0:-1])
             else:
                 lines.append(line)
-            # 只有.init和.fini这两个section之间的部分是汇编指令。
-            if line.startswith('.init (PROGBITS) section started'):
+            '''
+            ELF: 只有.init和.fini这两个section之间的部分是汇编指令
+            PE: 只有.text section是汇编指令
+            MachO: 只有__text和__stub_helper之间
+            '''
+            if line.startswith('.init (PROGBITS) section started') or line.startswith('.text section started') or line.startswith('__text (PURE_CODE) section started'):
                 lines = []
-            elif line.startswith('.fini (PROGBITS) section ended'):
+            elif line.startswith('.fini (PROGBITS) section ended') or line.startswith('.text section ended') or line.startswith('__stub_helper (PURE_CODE) section ended'):
                 break
         # 如果有.rodata
         # record = False
@@ -71,7 +75,7 @@ def ReadDisasm(disasmPath, arch):
     continuation = False # 不考虑Continuation的部分
     for i in range(len(lines)):
         line = lines[i]
-        if line.startswith('.'):
+        if line.startswith('.') or line.startswith('__'):
             continue
         if line.startswith('{ Continuation of'):
             continuation = True
@@ -96,10 +100,11 @@ def ReadDisasm(disasmPath, arch):
             
                 if (line[0] == tmp) and (not is_hex(line[1])): # 函数名
                     # 存储上一个函数
-                    func['blocks'] = blocks
-                    func['bb_addr_list'] = bb_addr_list
-                    funcs.append(func)
-                    addr2func[func['offset']] = func
+                    if bb_addr_list != []:
+                        func['blocks'] = blocks
+                        func['bb_addr_list'] = bb_addr_list
+                        funcs.append(func)
+                        addr2func[func['offset']] = func
 
                     # 初始化
                     func = {'offset': int(line[0], 16), 'header': ' '.join(line[1:])}
@@ -139,11 +144,12 @@ def ReadDisasm(disasmPath, arch):
     # 存储最后一个函数
     if block != []:
         blocks.append(block)
-    func['blocks'] = blocks
-    func['bb_addr_list'] = bb_addr_list
-    funcs.append(func)
+    if bb_addr_list != []:
+        func['blocks'] = blocks
+        func['bb_addr_list'] = bb_addr_list
+        funcs.append(func)
 
-    funcs.remove(funcs[0]) # 删除dummy
+    # funcs.remove(funcs[0]) # 删除dummy
 
     name2called = {} # 用于记录被调用的情况
     name2addr = {} # 通过函数名得到函数offset
