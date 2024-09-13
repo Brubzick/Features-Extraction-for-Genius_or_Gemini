@@ -18,6 +18,7 @@ pip3 install r2pipe
 """
 import r2pipe
 from contextlib import contextmanager
+import sys
 
 jump_ops = [
     'jz ', 'jnz ', 'jne ', 'jb ', 'jc ', 'jnb ',
@@ -56,9 +57,13 @@ class R2Helper:
                 addr2name[one['offset']] = one['name']
             
             arch = r2.cmd('-a')
-            arch = arch[0:-1]
-            if arch!='x86' and arch!='arm':
+            if 'x86' in arch:
+                arch = 'x86'
+            elif 'arm' in arch:
+                arch = 'arm'
+            else:
                 print('The arch is not well supported!!!')
+                sys.exit(0)
      
             # 遍历函数首地址，记录被调用情况
             addr2called = {}
@@ -84,7 +89,10 @@ class R2Helper:
                 f_name = func_name.replace('sym.imp.', '').replace('sym.', '').replace('dbg.', '')
                 r2.cmd("s 0x{0:x}".format(offset))
                 pdf = r2.cmdj("pdfj")
-                cmd_addr_list = [one['offset'] for one in pdf['ops']]
+                cmd_addr_list = []
+                for one in pdf['ops']:
+                    if one['offset'] not in cmd_addr_list:
+                        cmd_addr_list.append(one['offset'])
                 afb = r2.cmdj("afbj")
                 bb_addr_list = []
 
@@ -117,13 +125,16 @@ class R2Helper:
 
                 # 切割基本快
                 for i, one in enumerate(afb):
+                    bb_instrs =  one['instrs']
                     bb_addr = one['addr']
-                    idx = cmd_addr_list.index(bb_addr)
-                    if i == len(afb) - 1:
-                        bb_addr_list.append((bb_addr, cmd_addr_list[idx:]))
-                    else:
-                        next_idx = cmd_addr_list.index(afb[i+1]['addr'])
-                        bb_addr_list.append((bb_addr, cmd_addr_list[idx:next_idx]))
+                    bb_addr_list.append((bb_addr, bb_instrs))
+                    # if bb_addr in cmd_addr_list:
+                    #     idx = cmd_addr_list.index(bb_addr)
+                    #     if i == len(afb) - 1:
+                    #         bb_addr_list.append((bb_addr, cmd_addr_list[idx:]))
+                    #     else:
+                    #         next_idx = cmd_addr_list.index(afb[i+1]['addr'])
+                    #         bb_addr_list.append((bb_addr, cmd_addr_list[idx:next_idx]))
 
                 # 划分边
                 edges = []

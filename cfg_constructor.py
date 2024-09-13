@@ -1,22 +1,36 @@
 import networkx as nx
 from graph_analysis import *
+import sys
 
 def get_cfg(func, arch):
     cfg = nx.DiGraph()
     addr2node_id = {}
-    opcodeIndex = 0
+    # opcodeIndex = 0
+    ops = func['pdf']['ops']
+    offset2ops = {}
+    for one in ops:
+        offset2ops[one['offset']] = one
     for bb in func['bb_addr_list']:
         node_id = len(cfg)
         cfg.add_node(node_id)
         addr2node_id[bb[0]] = node_id
-        ops = func['pdf']['ops']
+        
         block = []
         opcode = []
         for addr in bb[1]:
-            if addr == ops[opcodeIndex]['offset']:
-                block.append(ops[opcodeIndex]['disasm'])
-                opcode.append(ops[opcodeIndex]['opcode'])
-            opcodeIndex += 1
+            if addr in offset2ops:
+                block.append(offset2ops[addr]['disasm'])
+                opcode.append(offset2ops[addr]['opcode'])
+        # for addr in bb[1]:
+        #     if addr == ops[opcodeIndex]['offset']:
+        #         block.append(ops[opcodeIndex]['disasm'])
+        #         opcode.append(ops[opcodeIndex]['opcode'])
+        #     else:
+        #         print(opcodeIndex)
+        #         print(bb[1])
+        #         sys.exit(0)
+        #     opcodeIndex += 1
+
         cfg.nodes[node_id]['addr'] = bb[0]
         cfg.nodes[node_id]['ins_addr_list'] = bb[1]
         cfg.nodes[node_id]['label'] = block
