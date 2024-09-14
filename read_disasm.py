@@ -73,6 +73,7 @@ def ReadDisasm(disasmPath, arch):
     block = []
     bb_addr_list = []
     continuation = False # 不考虑Continuation的部分
+    # continuation = {} # 考虑Continuation的部分
     for i in range(len(lines)):
         line = lines[i]
         if line.startswith('.') or line.startswith('__'):

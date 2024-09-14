@@ -62,7 +62,7 @@ class R2Helper:
             elif 'arm' in arch:
                 arch = 'arm'
             else:
-                print('The arch is not well supported!!!')
+                print('The arch of the binary is supported! Only \'x86\' and \'arm\' are supported')
                 sys.exit(0)
      
             # 遍历函数首地址，记录被调用情况
