@@ -8,16 +8,16 @@ import argparse
 if __name__ == '__main__':
 	# 输入参数
 	parser = argparse.ArgumentParser(description='input parameter')
-	parser.add_argument('--input', '-i', type=str, required=True, help='input file path')
-	parser.add_argument('--output', '-o', type=str, help='output file path, the same as the input dir by default')
-	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'binary\' or \'disassembly\'')
-	parser.add_argument('--arch', '-a', type=str, help='arch of input, \'x86\' or \'arm\', only required if input type is disassembly')
+	parser.add_argument('--input', '-i', type=str, required=True, help='input file path') # 输入的路径
+	parser.add_argument('--output', '-o', type=str, help='output file path, the same as the input dir by default') # 保存ACFG的文件夹的路径
+	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'binary\' or \'disassembly\'') # 类型
+	parser.add_argument('--arch', '-a', type=str, help='arch of input, \'x86\' or \'arm\', only required if input type is disassembly') # 汇编码的架构
 	args = parser.parse_args()
 
-	filePath = args.input # 输入的二进制路径
+	filePath = args.input # 输入的路径
 	fileName = os.path.basename(filePath)
 
-	path = args.output # 保存ACFG的路径
+	path = args.output # 保存ACFG的文件夹的路径
 	if path == None:
 		path = os.path.dirname(filePath)
 
@@ -34,9 +34,9 @@ if __name__ == '__main__':
 	elif inputType == 'disassembly':
 		arch = args.arch # 支持x86和arm
 		if arch == None:
-			print('arch is required for disassembly. \'x86\' and \'arm\' are supported.')
+			print('The arch[--arch/-a] is required for disassembly. \'x86\' and \'arm\' are supported.')
 		elif arch != 'x86' and arch != 'arm':
-			print('Not supported arch!!!')
+			print('Not supported arch! Use --help to see the parameters.')
 		else:
 			cfgs = get_func_cfgs_disasm(filePath, fileName, arch)
 			haveOutput = True

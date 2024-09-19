@@ -65,9 +65,9 @@ def calTransferIns(bl, arch):
         calls = {'jmp': 1, 'jz': 1, 'jnz': 1, 'js': 1, 'je': 1, 'jne': 1, 'jg': 1, 'jle': 1, 'jge': 1, 'ja': 1, 'jnc': 1,
                 'call': 1}
     elif arch == 'arm':
-        calls = {'mvn': 1, "mov": 1}
+        calls = {'mvn': 1, "mov": 1, 'beq': 1, 'bne': 1, 'bgtz': 1, "bltz": 1, "bgez": 1, "blez": 1}
     else:
-        calls = {'beq': 1, 'bne': 1, 'bgtz': 1, "bltz": 1, "bgez": 1, "blez": 1, 'j': 1, 'jal': 1, 'jr': 1, 'jalr': 1}
+        calls = {'j': 1, 'jal': 1, 'jr': 1, 'jalr': 1}
 
     invoke_num = 0
     for ins in bl:
