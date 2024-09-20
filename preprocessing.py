@@ -14,19 +14,14 @@ if __name__ == '__main__':
 	# 输入参数
 	parser = argparse.ArgumentParser(description='input parameter')
 	parser.add_argument('--input', '-i', type=str, required=True, help='input file path') # 输入的路径
-	parser.add_argument('--output', '-o', type=str, help='output file path, the same as the input dir by default') # 保存ACFG的文件夹的路径
+	parser.add_argument('--output', '-o', type=str, help='output file path, the same as the input with a \'.cfg\' postfix by default') # 保存ACFG的路径
 	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'bin\' or \'disasm\' or \'asm\'') # 类型
 	parser.add_argument('--arch', '-a', type=str, help='arch of input, \'x86\' or \'arm\', only required if input type is disassembly') # 汇编码的架构
-	parser.add_argument('--parse', '-p', type=bool, help='whether use asm-parser, default True') # 是否使用asm-parser
 
 	args = parser.parse_args()
 
 	filePath = args.input # 输入的路径
 	fileName = os.path.basename(filePath)
-
-	path = args.output # 保存ACFG的文件夹的路径
-	if path == None:
-		path = os.path.dirname(filePath)
 
 	inputType = args.type # 'bin'或'disasm'或'asm', 输入为二进制或汇编码文本
 
@@ -49,24 +44,23 @@ if __name__ == '__main__':
 			haveOutput = True
 	# 汇编码，gcc或clang的汇编结果
 	elif inputType == 'asm':
-		parse = args.parse
-		if parse == None:
-			parse = True
-		if parse:
-			parser_output = os.path.join(ASM_PARSER_OUT_DIR, fileName+'.txt')
-			command = './' + ASM_PARSER_PATH + ' ' + filePath + ' -unused_labels -directives -comment_only  -outputtext > ' + parser_output
-			process = subprocess.run(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-			filePath = parser_output
-		cfgs = get_func_cfgs_asm(filePath, fileName)
+		parser_output = os.path.join(ASM_PARSER_OUT_DIR, fileName+'.txt')
+		command = './' + ASM_PARSER_PATH + ' ' + filePath + ' -unused_labels -directives -comment_only  -outputtext > ' + parser_output
+		process = subprocess.run(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		cfgs = get_func_cfgs_asm(parser_output, fileName)
 		haveOutput = True
 
-		
 	else:
 		print('Wrong type. Use --help to see the parameters.')
 
 	if haveOutput:
-		binary_name = fileName + '.cfg'
-		fullpath = os.path.join(path, binary_name)
+		path = args.output # 保存ACFG的路径
+		if path == None:
+			path = os.path.dirname(filePath)
+			binary_name = fileName + '.cfg'
+			fullpath = os.path.join(path, binary_name)
+		else:
+			fullpath = path
 		print(cfgs)
 		print("===================--====================")
 		pickle.dump(cfgs, open(fullpath,'wb'))

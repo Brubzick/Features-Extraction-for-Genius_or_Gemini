@@ -113,9 +113,16 @@ def getLocalVariables(func):
     arm_regs = {'r0','r1','r2','r3',
                 'x0','x1','x2','x3','x4','x5','x6','x7',
                 'w0','w1','w2','w3','w4','w5','w6','w7'}
-    push = {'push', 'pushl', 'pushq'}
     x86_64_stack = {'%rbp','%ebp'}
     arm_stack = {'sp','fp','x29'}
+    calls = {'jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
+            'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
+            'jmp','call',
+            'beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
+            'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
+            'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
+            'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
+            'bl', 'b', 'bx', 'blx'}
 
     block = func['blocks'][0] # 第一个基本块
     stacking = True
@@ -127,7 +134,7 @@ def getLocalVariables(func):
         inst = ins.split()
         # x86
         if inst[0] in {'mov', 'movl', 'movq'}:
-            index = max(inst[2].find(stack) for stack in x86_64_stack)
+            index = max(inst[2].find('('+stack+')') for stack in x86_64_stack)
             if index > -1: # 从参数寄存器中读取参数入栈
                 if stacking == False: # 已开始从栈中读取
                     return argsNum
@@ -179,6 +186,9 @@ def getLocalVariables(func):
                         else:
                             argsNum += 1
                             fList.append(f)
+        
+        elif inst[0] in calls:
+            return argsNum
     
     return argsNum
 
@@ -209,7 +219,8 @@ def getBBstrings(block,name2strData):
             'beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
             'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
             'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
-            'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal'}
+            'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
+            'bl', 'b', 'bx', 'blx'}
 
     strings = []
     for ins in block:
@@ -228,10 +239,16 @@ def getBBstrings(block,name2strData):
                         continue
                     if ins[nextIndex] != '+':
                         if name2strData[name] not in strings:
-                            strings.append(name2strData[name])
+                            strData = name2strData[name]
+                            if strData.endswith('\\000'):
+                                strData = strData[0:-4]
+                            strings.append(strData)
                 else:
                     if name2strData[name] not in strings:
-                        strings.append(name2strData[name])
+                        strData = name2strData[name]
+                        if strData.endswith('\\000'):
+                            strData = strData[0:-4]
+                        strings.append(strData)
                 break
 
     return strings
@@ -256,9 +273,8 @@ def getBBconsts(opcode):
 
         if ins[0] in calls:
             continue
-        
         for op in ins:
-            if op[0] == '#' or op[0] == '$':
+            if (op[0] == '#' or op[0] == '$') and len(op) >= 2:
                 op = op[1:]
                 if op[-1] == ',':
                     op = op[:-1]
@@ -268,7 +284,10 @@ def getBBconsts(opcode):
                 else:
                     digit = op
                 if digit.isdigit():
-                    consts.append(int(op))
+                    if op[0] == '-':
+                        consts.append(-int(op))
+                    else:
+                        consts.append(int(op))
     
     return consts
         
