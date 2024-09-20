@@ -115,6 +115,7 @@ def getLocalVariables(func):
                 'w0','w1','w2','w3','w4','w5','w6','w7'}
     x86_64_stack = {'%rbp','%ebp'}
     arm_stack = {'sp','fp','x29'}
+    push = {'push','pushq','pushl'}
     calls = {'jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
             'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
             'jmp','call',
@@ -129,6 +130,13 @@ def getLocalVariables(func):
     fList = []
     paras = []
     argsNum = 0
+
+    ins = block[0].split()
+    if ins[0] in push:
+        if ins[1].startswith('{'):
+            arm_stack.add(ins[1][1:])
+        elif ins[1].startswith('%'):
+            x86_64_stack.add(ins[1])
 
     for ins in block:
         inst = ins.split()
@@ -146,11 +154,20 @@ def getLocalVariables(func):
                 argsNum += 1
                 fList.append(inst[2])
             else:
+                if stacking:
+                    firstF = fList.copy()
                 index = max(inst[1].find('(%rbp)'), inst[1].find('(%ebp)'))
                 if index > -1: # 开始从栈中读取
                     stacking = False
                     ftmp = inst[1][0:-1]
-                    if ftmp not in fList:
+                    if ftmp in fList:
+                        if ftmp in firstF:
+                            firstF.remove(ftmp)
+                        else:
+                            return argsNum
+                    else:
+                        if firstF != []:
+                            continue
                         fList.append(ftmp)
                         argsNum += 1
         #arm
@@ -166,7 +183,12 @@ def getLocalVariables(func):
                     index = max(inst[2].find(stack) for stack in arm_stack)
                     if index == -1: # 读到了别的地方
                         return argsNum
-                    f = ' '.join(inst[2:4])
+                    
+                    for i in range(2, len(inst)):
+                        if inst[i].endswith(']'):
+                            break
+                    f = ' '.join(inst[2:i+1])
+
                     if f in fList:
                         return argsNum
                     fList.append(f)
@@ -177,15 +199,29 @@ def getLocalVariables(func):
                     return argsNum
         # 从栈中读取参数    
         elif inst[0] in {'ldr', 'ldur'}:
+            if stacking:
+                firstF = fList.copy()
             if inst[2][0] == '[':
                     index = max(inst[2].find(stack) for stack in arm_stack)
                     if index > -1:
-                        f = ' '.join(inst[2:4])
+
+                        for i in range(2, len(inst)):
+                            if inst[i].endswith(']'):
+                                break
+                        f = ' '.join(inst[2:i+1])
+
                         if f in fList:
                             stacking = True
+                            if f in firstF:
+                                firstF.remove(f)
+                            else:
+                                return argsNum
                         else:
-                            argsNum += 1
-                            fList.append(f)
+                            if firstF == []:
+                                argsNum += 1
+                                fList.append(f)
+                            else:
+                                continue
         
         elif inst[0] in calls:
             return argsNum

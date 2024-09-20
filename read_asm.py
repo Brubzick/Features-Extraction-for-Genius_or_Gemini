@@ -158,13 +158,14 @@ def ConstructFuncs(filePath):
                 if modBlock != []:
                     blocks.append(modBlock)
 
-        conFunc['blocks'] = blocks
-        conFunc['bb_addr_list'] = bb_addr_list
-        conFunc['call'] = call
-        conFunc['bName2addr'] = func['name2id']
-        
-        conFuncs.append(conFunc)
-        funcname2lastInst[func['funcName']] = blocks[-1][-1]
+        if blocks != []:
+            conFunc['blocks'] = blocks
+            conFunc['bb_addr_list'] = bb_addr_list
+            conFunc['call'] = call
+            conFunc['bName2addr'] = func['name2id']
+            
+            conFuncs.append(conFunc)
+            funcname2lastInst[func['funcName']] = blocks[-1][-1]
 
 
     # 边和被调用
