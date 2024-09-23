@@ -1,4 +1,5 @@
 需要安装radare2：https://github.com/radareorg/radare2
+
 需要安装asm-parser: https://github.com/compiler-explorer/asm-parser
 
 在preprocessing.py中，将ASM_PARSER_PATH设置为：asm-parser所在目录/build/bin/asm-parser
@@ -20,3 +21,19 @@ ASM_PARSER_OUT_DIR为asm-parser的输出目录，可自定义设置，默认为�
 输入类型为 'asm' （汇编码）时，使用gcc或clang的汇编结果（的排列形式的汇编码文本）作为输入（gcc -S / clang -S）
 
 在使用'asm'作为输入时，汇编码首先会经过asm-parser处理（使用python的subprocess库在脚本中执行了shell命令），处理后的汇编码会输出到ASM_PARSER_OUT_DIR设置的目录，然后该输出会作为输入继续处理并提取特征。
+
+radare2: https://github.com/radareorg/radare2
+
+asm-parser: https://github.com/compiler-explorer/asm-parser
+
+In preprocessing.py, set ASM_PARSER_PATH and ASM_PARSER_OUT_DIR.
+
+Run 'python preprocessing.py -i <inputPath> -o <outputPath> -t <inputType> -a <inputArch>'
+
+Use -h/--help to see details
+
+x86 and arm are supported.
+
+'disasm' takes Binary Ninja disassembly form as input.
+
+'asm' takes assembly form of gcc or clang (gcc -S / clang -S).
