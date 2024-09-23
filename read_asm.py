@@ -123,6 +123,7 @@ def ConstructFuncs(filePath):
     conFuncs = []
     funcname2lastInst = {}
     name2strData = {}
+    strLabel = {}
 
     for func in funcs:
         conFunc = {'funcname': func['funcName']}
@@ -138,10 +139,24 @@ def ConstructFuncs(filePath):
 
             # data block
             if b['bName'].startswith('.LC') or b['bName'].startswith('.L.str'):
-                inst = block[0].split()
-                strData = ' '.join(inst[1:])
-                if strData[0] == '"' and strData[-1] == '"':
-                    name2strData[b['bName']] = strData[1:-1]
+                if b['bName'].startswith('.LCPI'): # clang-arm中的情况
+                    for i in range(len(block)):
+                        inst = block[i].split()
+                        if inst[0] == '.long':
+                            if i == 0:
+                                label = b['bName']
+                            else:
+                                label = b['bName'] + '+' + str(i*4)
+                            try:
+                                j = inst[1].index('-')
+                                strLabel[label] = inst[1][0:j]
+                            except:
+                                pass
+                else:
+                    inst = block[0].split()
+                    strData = ' '.join(inst[1:])
+                    if strData[0] == '"' and strData[-1] == '"':
+                        name2strData[b['bName']] = strData[1:-1]
             # canonical block    
             else: 
                 modBlock = []
@@ -149,7 +164,7 @@ def ConstructFuncs(filePath):
                     inst = block[i].split()
 
                     if inst[0].startswith('.'):
-                        if inst[0] == '.word':
+                        if inst[0] == '.word': # gcc-arm中会出现的情况
                             if i == 0:
                                 label = b['bName']
                             else:
@@ -173,6 +188,12 @@ def ConstructFuncs(filePath):
                     addr_index += 1
                 if modBlock != []:
                     blocks.append(modBlock)
+
+        # clang-arm中.long的情况
+        if strLabel != {}:
+            for key in strLabel:
+                if name2strData.get(strLabel[key]) != None:
+                    name2strData[key] = name2strData[strLabel[key]]
 
         if blocks != []:
             conFunc['blocks'] = blocks
@@ -221,11 +242,7 @@ def ConstructFuncs(filePath):
         conFunc['edges'] = edges
         
         del conFunc['bName2addr']
+    
+    print(name2strData)
 
     return conFuncs, name2strData
-
-
-
-# conFuncs, name2strData = ConstructFuncs('./gnu_asm/dfs_gcc_arm.txt')
-
-# print(name2strData)
