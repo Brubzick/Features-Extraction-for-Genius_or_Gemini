@@ -28,7 +28,7 @@ asm-parser: https://github.com/compiler-explorer/asm-parser
 
 In preprocessing.py, set ASM_PARSER_PATH and ASM_PARSER_OUT_DIR.
 
-Run 'python preprocessing.py -i <inputPath> -o <outputPath> -t <inputType> -a <inputArch>'
+Run 'python preprocessing.py -i [inputPath] -o [outputPath] -t [inputType] -a [inputArch]'
 
 Use -h/--help to see details
 
