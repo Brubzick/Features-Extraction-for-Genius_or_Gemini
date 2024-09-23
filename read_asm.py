@@ -1,3 +1,4 @@
+import sys
 
 def ReadAsm(filePath):
     asmLines = []
@@ -19,7 +20,15 @@ def Split2Functions(asmLines):
     start = 0
     end = 0
 
+    # 移到第一个函数的开头
     for i in range(len(asmLines)):
+        line = asmLines[i]
+        if isFunctionEnd(line):
+            start = i
+            end = i
+            break   
+    # 遍历函数
+    for i in range(start, len(asmLines)):
         line = asmLines[i]
         if isFunctionEnd(line):
             end = i
@@ -40,7 +49,14 @@ def Split2BBlocks(asmLines, funcRange):
         return []
     
     funcName = asmLines[start]
-    right = funcName.index(':')
+    
+    # 如果输入的文本没有函数头，则会提示no functions并退出程序
+    try:
+        right = funcName.index(':')
+    except:
+        print('There are no functions.')
+        sys.exit(0)
+
     funcName = funcName[0:right]
     start += 1
 
