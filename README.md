@@ -1,3 +1,9 @@
+提取特征用于输入基于Genius或Gemini的神经网络模型
+
+Genius: https://www.cs.ucr.edu/~heng/pubs/genius-ccs16.pdf
+
+Gemini: https://arxiv.org/pdf/1708.06525
+
 需要安装radare2：https://github.com/radareorg/radare2
 
 需要安装asm-parser: https://github.com/compiler-explorer/asm-parser
@@ -21,6 +27,12 @@ ASM_PARSER_OUT_DIR为asm-parser的输出目录，可自定义设置，默认为�
 输入类型为 'asm' （汇编码）时，使用gcc或clang的汇编结果（的排列形式的汇编码文本）作为输入（gcc -S / clang -S），最好是O0优化等级的情况（即默认优化等级）。
 
 在使用'asm'作为输入时，汇编码首先会经过asm-parser处理（使用python的subprocess库在脚本中执行了shell命令），处理后的汇编码会输出到ASM_PARSER_OUT_DIR设置的目录，然后该输出会作为输入继续处理并提取特征。
+
+Used to extract features from binary or assembly for NN based on Genius or Gemini.
+
+Genius: https://www.cs.ucr.edu/~heng/pubs/genius-ccs16.pdf
+
+Gemini: https://arxiv.org/pdf/1708.06525
 
 radare2: https://github.com/radareorg/radare2
 
