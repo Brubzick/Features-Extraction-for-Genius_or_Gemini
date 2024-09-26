@@ -3,6 +3,7 @@ from func import get_func_cfgs_c
 from func_disasm import get_func_cfgs_disasm
 from func_asm import get_func_cfgs_asm
 import os
+import sys
 import pickle
 import argparse
 import subprocess
@@ -22,6 +23,10 @@ if __name__ == '__main__':
 
 	filePath = args.input # 输入的路径
 	fileName = os.path.basename(filePath)
+
+	if not os.path.exists(filePath):
+		print('Input path does not exist.')
+		sys.exit(0)
 
 	inputType = args.type # 'bin'或'disasm'或'asm', 输入为二进制或汇编码文本
 
