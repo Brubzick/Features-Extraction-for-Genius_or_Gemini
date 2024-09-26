@@ -47,7 +47,7 @@ if __name__ == '__main__':
 	elif inputType == 'asm':
 		# 执行shell命令使用asm-parser
 		parser_output = os.path.join(ASM_PARSER_OUT_DIR, fileName+'.txt')
-		command = './' + ASM_PARSER_PATH + ' ' + filePath + ' -unused_labels -directives -comment_only  -outputtext > ' + parser_output
+		command = ASM_PARSER_PATH + ' ' + filePath + ' -unused_labels -directives -comment_only -outputtext > ' + parser_output
 		process = subprocess.run(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 		cfgs = get_func_cfgs_asm(parser_output, fileName)
 		haveOutput = True

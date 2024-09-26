@@ -242,7 +242,5 @@ def ConstructFuncs(filePath):
         conFunc['edges'] = edges
         
         del conFunc['bName2addr']
-    
-    print(name2strData)
 
     return conFuncs, name2strData
