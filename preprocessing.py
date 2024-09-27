@@ -71,6 +71,6 @@ if __name__ == '__main__':
 		print(cfgs)
 		print("===================--====================")
 		pickle.dump(cfgs, open(fullpath,'wb'))
-		print(binary_name)
+		print(fullpath)
 
 
