@@ -10,7 +10,7 @@ def getFuncCalls(cfg):
     return sumcall
 
 def calCalls(block):
-    calls = ['call', 'bl', 'blx', 'bx']
+    calls = {'call', 'bl', 'blx', 'bx'}
 
     callnum = 0
     for ins in block:
