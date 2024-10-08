@@ -1,21 +1,16 @@
 import networkx as nx
 
 # No. of calls
-def getFuncCalls(cfg, arch):
+def getFuncCalls(cfg):
     sumcall = 0
     for node in cfg.nodes:
         block = cfg.nodes[node]['label']
-        callmun = calCalls(block, arch)
+        callmun = calCalls(block)
         sumcall += callmun
     return sumcall
 
-def calCalls(block, arch):
-    if arch == 'x86':
-        calls = {'call': 1}
-    elif arch == 'arm':
-        calls = {'bl': 1, 'blx': 1, 'bx': 1}
-    else:
-        calls = {'jal': 1, 'jalr': 1}
+def calCalls(block):
+    calls = {'call', 'bl', 'blx', 'bx'}
 
     callnum = 0
     for ins in block:
@@ -26,22 +21,24 @@ def calCalls(block, arch):
     return callnum
 
 # No. of logic instructions
-def getLogicInsts(cfg,arch):
+def getLogicInsts(cfg):
     sumInsts = 0
     for node in cfg.nodes:
         block = cfg.nodes[node]['label']
-        instNum = calLogicInstructions(block,arch)
+        instNum = calLogicInstructions(block)
         sumInsts += instNum
     return sumInsts
 
-def calLogicInstructions(bl, arch):
-    if arch == 'x86':
-        calls = {'and': 1, 'andn': 1, 'andnpd': 1, 'andpd': 1, 'andps': 1, 'andnps': 1, 'test': 1, 'xor': 1, 'xorpd': 1,
+def calLogicInstructions(bl):
+    x86_calls = {'and': 1, 'andn': 1, 'andnpd': 1, 'andpd': 1, 'andps': 1, 'andnps': 1, 'test': 1, 'xor': 1, 'xorpd': 1,
                 'pslld': 1}
-    elif arch == 'arm':
-        calls = {'and': 1, 'orr': 1, 'eor': 1, 'bic': 1, 'mvn': 1, 'tst': 1, 'teq': 1, 'cmp': 1, 'cmn': 1}
-    else:
-        calls = {'and': 1, 'andi': 1, 'or': 1, 'ori': 1, 'xor': 1, 'nor': 1, 'slt': 1, 'slti': 1, 'sltu': 1}
+    x64_calls = {'andq': 1, 'andnq': 1, 'andnpdq': 1, 'andpdq': 1, 'andpsq': 1, 'andnpsq': 1, 'testq': 1, 'xorq': 1, 'xorpdq': 1,'pslldq': 1,
+                    'andl': 1, 'andnl': 1, 'andnpdl': 1, 'andpdl': 1, 'andpsl': 1, 'andnpsl': 1, 'testl': 1, 'xorl': 1, 'xorpdl': 1,'pslldl': 1}
+    arm_calls = {'and': 1, 'orr': 1, 'eor': 1, 'bic': 1, 'mvn': 1, 'tst': 1, 'teq': 1, 'cmp': 1, 'cmn': 1}
+    calls = {}
+    calls.update(x64_calls)
+    calls.update(x86_calls)
+    calls.update(arm_calls)
 
     invoke_num = 0
     for ins in bl:
@@ -52,22 +49,21 @@ def calLogicInstructions(bl, arch):
     return invoke_num
 
 # No. of transfer instructions
-def getTransferInsts(cfg,arch):
+def getTransferInsts(cfg):
     sumInsts = 0
     for node in cfg.nodes:
         block = cfg.nodes[node]['label']
-        instNum = calTransferIns(block,arch)
+        instNum = calTransferIns(block)
         sumInsts += instNum
     return sumInsts
 
-def calTransferIns(bl, arch):
-    if arch == 'x86':
-        calls = {'jmp': 1, 'jz': 1, 'jnz': 1, 'js': 1, 'je': 1, 'jne': 1, 'jg': 1, 'jle': 1, 'jge': 1, 'ja': 1, 'jnc': 1,
+def calTransferIns(bl):
+    x86_calls = {'jmp': 1, 'jz': 1, 'jnz': 1, 'js': 1, 'je': 1, 'jne': 1, 'jg': 1, 'jle': 1, 'jge': 1, 'ja': 1, 'jnc': 1,
                 'call': 1}
-    elif arch == 'arm':
-        calls = {'mvn': 1, "mov": 1, 'beq': 1, 'bne': 1, 'bgtz': 1, "bltz": 1, "bgez": 1, "blez": 1}
-    else:
-        calls = {'j': 1, 'jal': 1, 'jr': 1, 'jalr': 1}
+    arm_calls = {'mvn': 1, "mov": 1, 'beq': 1, 'bne': 1, 'bgtz': 1, "bltz": 1, "bgez": 1, "blez": 1}
+    calls = {}
+    calls.update(x86_calls)
+    calls.update(arm_calls)
 
     invoke_num = 0
     for ins in bl:
@@ -87,7 +83,7 @@ def retrieveGP(g):
     bf = betweeness(g)
     x = sorted(bf.values())
     if len(x) == 0:
-        value = sum(x)
+        value = 0
     else:
         value = sum(x)/len(x)
     return round(value,5)
@@ -119,32 +115,31 @@ def getIncommingCalls(func):
     return len(func['called'])
 
 # constants
-def getfunc_consts(cfg,arch):
+def getfunc_consts(cfg):
     strings = []
     consts = []
     for node in cfg.nodes:
         block = cfg.nodes[node]['label']
         opcode = cfg.nodes[node]['opcode']
-        strs = getBBstrings(block, arch)
-        cons = getBBconsts(opcode, arch)
+        strs = getBBstrings(block)
+        cons = getBBconsts(opcode)
         strings += strs
         consts += cons
     
     return strings, consts
 
-def getBBstrings(block, arch):
-    if arch == 'x86':
-        calls = ['jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
-                'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
-                'jmp','call','mov']
-    elif arch == 'arm':
-        calls = ['beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
-                 'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
-                 'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
-                 'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
-                 'str', 'mov', 'bl', 'b', 'bx', 'blx']
-    else:
-        calls = ['la', 'jalr', 'call', 'jal']
+def getBBstrings(block):
+    calls_x86 = {'jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
+            'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
+            'jmp','call','mov'}
+    calls_arm = {'beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
+            'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
+            'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
+            'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
+            'str', 'mov', 'bl', 'b', 'bx', 'blx'}
+    calls = {}
+    calls.update(calls_x86)
+    calls.update(calls_arm)
 
     strings = []
     for ins in block:
@@ -157,20 +152,19 @@ def getBBstrings(block, arch):
     
     return strings
 
-def getBBconsts(opcode, arch):
-    if arch == 'x86':
-        calls = {'jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
-                'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
-                'jmp','call','mov'}
-    elif arch == 'arm':
-        calls = {'beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
-                 'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
-                 'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
-                 'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
-                 'moveq','movne','movcs','movcc','movmi','movpl','movvs','movvc','movhi','movls','movge','movlt','movgt','movle','moval',
-                 'ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx'}
-    else:
-        calls = {'la', 'jalr', 'call', 'jal'}
+def getBBconsts(opcode):
+    calls_x86 = {'jz','jnz','jc','jnc','jo','jno','js','jns','jp','jnp','je','jne','jcxz','jecxz','jrcxz',
+            'ja','jnbe','jae','jnb','jb','jnae','jbe','jna','jg','jnle','jge','jnl','jl','jnge','jle',
+            'jmp','call','mov'}
+    calls_arm = {'beq','bne','bcs','bcc','bmi','bpl','bvs','bvc','bhi','bls','bge','blt','bgt','ble','bal',
+            'bxeq','bxne','bxcs','bxcc','bxmi','bxpl','bxvs','bxvc','bxhi','bxls','bxge','bxlt','bxgt','bxle','bxal',
+            'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
+            'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
+            'moveq','movne','movcs','movcc','movmi','movpl','movvs','movvc','movhi','movls','movge','movlt','movgt','movle','moval',
+            'ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx'}
+    calls = {}
+    calls.update(calls_x86)
+    calls.update(calls_arm)
 
     consts = []
     for ins in opcode:
@@ -192,14 +186,16 @@ def getBBconsts(opcode, arch):
     
     return consts
         
-def calArithmeticIns(bl,arch):
+def calArithmeticIns(bl):
     # 定义各架构中的算术指令
-    if arch == 'x86':
-        calls = {'add': 1, 'sub': 1, 'div': 1, 'imul': 1, 'idiv': 1, 'mul': 1, 'shl': 1, 'dec': 1, 'inc': 1}
-    elif arch == 'arm':
-        calls = {'add': 1, 'sub': 1, 'mul': 1, 'mla': 1, 'mls': 1, 'sdiv': 1, 'udiv': 1, 'rsb': 1, 'rsc': 1}  # ARM 架构中的算术指令
-    else:
-        calls = {'add': 1, 'addu': 1, 'addi': 1, 'addiu': 1, 'mult': 1, 'multu': 1, 'div': 1, 'divu': 1}
+    x86_calls = {'add': 1, 'sub': 1, 'div': 1, 'imul': 1, 'idiv': 1, 'mul': 1, 'shl': 1, 'dec': 1, 'inc': 1}
+    x64_calls = {'addl': 1, 'subl': 1, 'divl': 1, 'imull': 1, 'idivl': 1, 'mull': 1, 'shll': 1, 'decl': 1, 'incl': 1,
+                 'addq': 1, 'subq': 1, 'divq': 1, 'imulq': 1, 'idivq': 1, 'mulq': 1, 'shlq': 1, 'decq': 1, 'incq': 1}
+    arm_calls = {'add': 1, 'sub': 1, 'mul': 1, 'mla': 1, 'mls': 1, 'sdiv': 1, 'udiv': 1, 'rsb': 1, 'rsc': 1}  # ARM 架构中的算术指令
+    calls = {}
+    calls.update(x64_calls)
+    calls.update(x86_calls)
+    calls.update(arm_calls)
 
     invoke_num = 0
     for ins in bl:

@@ -331,7 +331,7 @@ def calArithmeticIns(bl):
     # 定义各架构中的算术指令
     x86_calls = {'add': 1, 'sub': 1, 'div': 1, 'imul': 1, 'idiv': 1, 'mul': 1, 'shl': 1, 'dec': 1, 'inc': 1}
     x64_calls = {'addl': 1, 'subl': 1, 'divl': 1, 'imull': 1, 'idivl': 1, 'mull': 1, 'shll': 1, 'decl': 1, 'incl': 1,
-                    'addq': 1, 'subq': 1, 'divq': 1, 'imulq': 1, 'idivq': 1, 'mulq': 1, 'shlq': 1, 'decq': 1, 'incq': 1}
+                 'addq': 1, 'subq': 1, 'divq': 1, 'imulq': 1, 'idivq': 1, 'mulq': 1, 'shlq': 1, 'decq': 1, 'incq': 1}
     arm_calls = {'add': 1, 'sub': 1, 'mul': 1, 'mla': 1, 'mls': 1, 'sdiv': 1, 'udiv': 1, 'rsb': 1, 'rsc': 1}  # ARM 架构中的算术指令
     calls = {}
     calls.update(x64_calls)

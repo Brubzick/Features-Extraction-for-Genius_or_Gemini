@@ -1,8 +1,7 @@
 import networkx as nx
 from graph_analysis import *
-import sys
 
-def get_cfg(func, arch):
+def get_cfg(func):
     cfg = nx.DiGraph()
     addr2node_id = {}
     # opcodeIndex = 0
@@ -21,15 +20,6 @@ def get_cfg(func, arch):
             if addr in offset2ops:
                 block.append(offset2ops[addr]['disasm'])
                 opcode.append(offset2ops[addr]['opcode'])
-        # for addr in bb[1]:
-        #     if addr == ops[opcodeIndex]['offset']:
-        #         block.append(ops[opcodeIndex]['disasm'])
-        #         opcode.append(ops[opcodeIndex]['opcode'])
-        #     else:
-        #         print(opcodeIndex)
-        #         print(bb[1])
-        #         sys.exit(0)
-        #     opcodeIndex += 1
 
         cfg.nodes[node_id]['addr'] = bb[0]
         cfg.nodes[node_id]['ins_addr_list'] = bb[1]
@@ -47,12 +37,12 @@ def get_cfg(func, arch):
         cfg.nodes[node1]['suc'].append(node2)
         cfg.nodes[node2]['pre'].append(node1)
     
-    cfg = attributingRe(cfg, func, arch)
+    cfg = attributingRe(cfg, func)
 
     return cfg
         
 
-def attributingRe(cfg, func, arch):  # 为每个基本块生成自定义的属性
+def attributingRe(cfg, func):  # 为每个基本块生成自定义的属性
     call = func['call'].copy()
     call.reverse()
     for node_id in cfg:
@@ -60,19 +50,19 @@ def attributingRe(cfg, func, arch):  # 为每个基本块生成自定义的属�
         op = cfg.nodes[node_id]['opcode']
         numIns = calInsts(bl)  # No. of Instruction
         cfg.nodes[node_id]['numIns'] = numIns
-        numCalls = calCalls(bl,arch)  # No. of Calls
+        numCalls = calCalls(bl)  # No. of Calls
         cfg.nodes[node_id]['numCalls'] = numCalls
-        numLIs = calLogicInstructions(bl,arch)  # 这个不再Genius的范围内
+        numLIs = calLogicInstructions(bl)  # 这个不再Genius的范围内
         cfg.nodes[node_id]['numLIs'] = numLIs
-        numAs = calArithmeticIns(bl,arch)  # No. of Arithmetic Instructions
+        numAs = calArithmeticIns(bl)  # No. of Arithmetic Instructions
         cfg.nodes[node_id]['numAs'] = numAs
-        strings = getBBstrings(bl,arch)  # String and numeric constants
-        consts = getBBconsts(op,arch)
+        strings = getBBstrings(bl)  # String and numeric constants
+        consts = getBBconsts(op)
         cfg.nodes[node_id]['numNc'] = len(strings) + len(consts)
         cfg.nodes[node_id]['consts'] = consts
         cfg.nodes[node_id]['strings'] = strings
         externs = retrieveExterns(bl, call)
         cfg.nodes[node_id]['externs'] = externs
-        numTIs = calTransferIns(bl,arch)  # No. of Transfer Instruction
+        numTIs = calTransferIns(bl)  # No. of Transfer Instruction
         cfg.nodes[node_id]['numTIs'] = numTIs
     return cfg

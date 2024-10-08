@@ -45,29 +45,35 @@ class R2Helper:
         计算被测对象的所有函数首地址、各函数中所有指令地址、函数基本块、控制流图的边、以及call信息四部分
         """
         res = []
+        entryOffset = None
         with make_r2(self.file_path) as r2:
             r2.cmd("aaa")
-            # r2.cmd("e anal.vars=false;e anal.hasnext=true;afr;aac")
             # 记录所有函数首地址
             addr2name = {}
             func_offset_list = []
             r2.cmd('afr')
             for one in r2.cmdj('aflj'):
-                func_offset_list.append((one['offset'],one['name']))
-                addr2name[one['offset']] = one['name']
-            
+                f_name = one['name'].replace('sym.imp.', '').replace('sym.', '').replace('dbg.', '')
+                func_offset_list.append((one['offset'],f_name))
+                addr2name[one['offset']] = f_name
+                if f_name == 'entry0':
+                    entryOffset = one['offset']
+
             arch = r2.cmd('-a')
             if 'x86' in arch:
                 arch = 'x86'
             elif 'arm' in arch:
                 arch = 'arm'
             else:
-                print('The arch of the binary is supported! Only \'x86\' and \'arm\' are supported')
+                print('The arch of the binary is not supported! Only \'x86\' and \'arm\' are supported')
                 sys.exit(0)
      
             # 遍历函数首地址，记录被调用情况
             addr2called = {}
             for offset, func_name in func_offset_list:
+                if offset < entryOffset:
+                    continue
+
                 r2.cmd("s 0x{0:x}".format(offset))
                 cg = r2.cmdj('afxj')
                 visited = []
@@ -86,7 +92,9 @@ class R2Helper:
 
             # 遍历函数首地址，获取指令地址
             for offset, func_name in func_offset_list:
-                f_name = func_name.replace('sym.imp.', '').replace('sym.', '').replace('dbg.', '')
+                if offset < entryOffset:
+                    continue
+
                 r2.cmd("s 0x{0:x}".format(offset))
                 pdf = r2.cmdj("pdfj")
                 cmd_addr_list = []
@@ -128,13 +136,6 @@ class R2Helper:
                     bb_instrs =  one['instrs']
                     bb_addr = one['addr']
                     bb_addr_list.append((bb_addr, bb_instrs))
-                    # if bb_addr in cmd_addr_list:
-                    #     idx = cmd_addr_list.index(bb_addr)
-                    #     if i == len(afb) - 1:
-                    #         bb_addr_list.append((bb_addr, cmd_addr_list[idx:]))
-                    #     else:
-                    #         next_idx = cmd_addr_list.index(afb[i+1]['addr'])
-                    #         bb_addr_list.append((bb_addr, cmd_addr_list[idx:next_idx]))
 
                 # 划分边
                 edges = []
@@ -148,13 +149,13 @@ class R2Helper:
                     # 'cmd_addr_list': cmd_addr_list,
                     'bb_addr_list': bb_addr_list,
                     'edges': edges,
-                    'func_name': f_name,
+                    'func_name': func_name,
                     'pdf': pdf,
                     'offset': offset,
                     'argsNum': argsNum,
                     'called': called,
                     'call': call
                 })
-        return res, arch
+        return res
 
 
