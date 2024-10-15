@@ -2,16 +2,13 @@ import sys
 
 def ReadAsm(filePath):
     asmLines = []
-    i = 0
     with open(filePath, 'r', encoding='utf-8') as f:
         for line in f:
             if line[-1] == '\n':
-                line = line[0:-1]
+                line = line[:-1]
             if line == '':
                 continue
             asmLines.append(line)
-            # print(i, line)
-            i += 1
     return asmLines
 
 
@@ -121,7 +118,6 @@ def ConstructFuncs(filePath):
     calls = ['call', 'bl', 'blx','bx']
     name2called = {}
     conFuncs = []
-    funcname2lastInst = {}
     name2strData = {}
     strLabel = {}
 
@@ -202,7 +198,6 @@ def ConstructFuncs(filePath):
             conFunc['bName2addr'] = func['name2id']
             
             conFuncs.append(conFunc)
-            funcname2lastInst[func['funcName']] = blocks[-1][-1]
 
 
     # 边和被调用
@@ -220,20 +215,17 @@ def ConstructFuncs(filePath):
         for block in conFunc['blocks']:
             curAddr = conFunc['bb_addr_list'][addr_index]
             inst = block[-1].split()
+            
             if inst[0] in jmps:
                 if bName2addr.get(inst[1]) != None:
                     edges.append((curAddr, bName2addr[inst[1]]))
+            
             elif inst[0] in conJmps:
                 if addr_index + len(block) < len(conFunc['bb_addr_list']):
                     edges.append((curAddr, conFunc['bb_addr_list'][addr_index+len(block)]))
                 if bName2addr.get(inst[1]) != None:
                     edges.append((curAddr, bName2addr[inst[1]]))
-            elif inst[0] in calls:
-                if addr_index + len(block) < len(conFunc['bb_addr_list']):
-                    if funcname2lastInst.get(inst[1]):
-                        lastInst = funcname2lastInst[inst[1]].split()
-                        if ('ret' in lastInst[0]) or ('pop' in lastInst[0]) or (lastInst == ['bx', 'lr']):
-                            edges.append((curAddr, conFunc['bb_addr_list'][addr_index+len(block)]))
+
             else:
                 if addr_index + len(block) < len(conFunc['bb_addr_list']):
                     edges.append((curAddr, conFunc['bb_addr_list'][addr_index+len(block)]))

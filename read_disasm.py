@@ -52,20 +52,6 @@ def ReadDisasm(disasmPath, arch):
                 lines = []
             elif line.startswith('.fini (PROGBITS) section ended') or line.startswith('.text section ended') or line.startswith('__stub_helper (PURE_CODE) section ended'):
                 break
-        # 如果有.rodata
-        # record = False
-        # for line in f:
-        #     if record:
-        #         if '=' in line:
-        #             line_s = line.split()
-        #             index = line.index('=')
-        #             dataName = line[index-1]
-
-        #     if line.startswith('.rodata (PROGBITS) section started'):
-        #         record = True
-        #     elif line.startswith('.rodata (PROGBITS) section ended'):
-        #         break
-
 
     func = {'offset': -1}
     addr2func = {}

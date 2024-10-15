@@ -150,7 +150,7 @@ def getLocalVariables(func):
                     return argsNum
                 if inst[1][0:-1] in paras: # 重复
                     return argsNum
-                paras.append(inst[0:-1])
+                paras.append(inst[1][0:-1])
                 argsNum += 1
                 fList.append(inst[2])
             else:
@@ -349,9 +349,10 @@ def calArithmeticIns(bl):
 def retrieveExterns(bl, call):
     externs = []
     for ins in bl:
+        inst = ins.split()
         if call == []: break
         extern = call[-1]
-        if extern in ins:
+        if extern in inst:
             externs.append(extern)
             call.pop()
     return externs
