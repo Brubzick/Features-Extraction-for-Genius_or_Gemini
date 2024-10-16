@@ -1,8 +1,3 @@
-import sys
-import os
-curDir = os.path.dirname(__file__)
-preDir = os.path.abspath(os.path.join(curDir, os.pardir))
-sys.path.append(preDir)
 from read_windbg import ConstructFuncs
 from cfg_constructor_windbg import get_cfg_windbg
 from discovRe_windbg import get_discoverRe_feature

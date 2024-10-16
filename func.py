@@ -1,8 +1,3 @@
-import sys
-import os
-curDir = os.path.dirname(__file__)
-preDir = os.path.abspath(os.path.join(curDir, os.pardir))
-sys.path.append(preDir)
 from radare2_utils import R2Helper
 from cfg_constructor import get_cfg
 from discovRe import get_discoverRe_feature

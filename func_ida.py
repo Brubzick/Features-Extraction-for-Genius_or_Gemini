@@ -1,8 +1,3 @@
-import sys
-import os
-curDir = os.path.dirname(__file__)
-preDir = os.path.abspath(os.path.join(curDir, os.pardir))
-sys.path.append(preDir)
 from read_ida import ConstructFuncs
 from cfg_constructor_ida import get_cfg_ida
 from discovRe_ida import get_discoverRe_feature
