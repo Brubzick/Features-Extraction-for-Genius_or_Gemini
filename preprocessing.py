@@ -1,6 +1,7 @@
 #coding:utf-8
 from func import get_func_cfgs_c
-from func_disasm import get_func_cfgs_disasm
+from func_ida import get_func_cfgs_ida
+from func_windbg import get_func_cfgs_windbg
 from func_asm import get_func_cfgs_asm
 import os
 import sys
@@ -16,8 +17,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='input parameter')
 	parser.add_argument('--input', '-i', type=str, required=True, help='input file path') # 输入的路径
 	parser.add_argument('--output', '-o', type=str, help='output file path, the same as the input with a \'.cfg\' postfix by default') # 保存ACFG的路径
-	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'bin\' or \'disasm\' or \'asm\'') # 类型
-	parser.add_argument('--arch', '-a', type=str, help='arch of input, \'x86\' or \'arm\', only required if input type is disassembly') # 汇编码的架构
+	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'bin\' or \'ida\' or \'windbg\' or \'asm\'') # 类型
 
 	args = parser.parse_args()
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 		print('Input path does not exist.')
 		sys.exit(0)
 
-	inputType = args.type # 'bin'或'disasm'或'asm', 输入为二进制或汇编码文本
+	inputType = args.type # 'bin'或'ida'或'windbg'或'asm', 输入为二进制或汇编码文本
 
 	haveOutput = False # 是否成功输出
 
@@ -37,18 +37,17 @@ if __name__ == '__main__':
 		cfgs = get_func_cfgs_c(filePath, fileName)
 		haveOutput = True
 	
-	# 汇编码，采用Binary Ninja的文本排列格式(即反汇编的结果)。
-	elif inputType == 'disasm':
-		arch = args.arch # 支持x86和arm
-		if arch == None:
-			print('The arch[--arch/-a] is required for disassembly. \'x86\' and \'arm\' are supported.')
-		elif arch != 'x86' and arch != 'arm':
-			print('Not supported arch! Use --help to see the parameters.')
-		else:
-			cfgs = get_func_cfgs_disasm(filePath, fileName, arch)
-			haveOutput = True
-			
-	# 汇编码，gcc或clang的汇编结果
+	# 汇编码，采用ida反汇编结果的文本排列格式。目前仅支持x86
+	elif inputType == 'ida':
+		cfgs = get_func_cfgs_ida(filePath, fileName)
+		haveOutput = True
+	
+	# 汇编码，采用ida反汇编结果的文本排列格式。目前仅支持x86
+	elif inputType == 'windbg':
+		cfgs = get_func_cfgs_windbg(filePath, fileName)
+		haveOutput = True
+
+	# 汇编码，gcc或clang的汇编结果，支持x86和arm
 	elif inputType == 'asm':
 		# 执行shell命令使用asm-parser
 		parser_output = os.path.join(ASM_PARSER_OUT_DIR, fileName+'.txt')
@@ -61,6 +60,8 @@ if __name__ == '__main__':
 		print('Wrong type. Use --help to see the parameters.')
 
 	if haveOutput:
+		for cfg in cfgs.raw_graph_list:
+			print(cfg.discovre_features)
 		path = args.output # 保存ACFG的路径
 		if path == None:
 			path = os.path.dirname(filePath)

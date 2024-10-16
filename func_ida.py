@@ -3,26 +3,23 @@ import os
 curDir = os.path.dirname(__file__)
 preDir = os.path.abspath(os.path.join(curDir, os.pardir))
 sys.path.append(preDir)
-from radare2_utils import R2Helper
-from cfg_constructor import get_cfg
-from discovRe import get_discoverRe_feature
+from read_ida import ConstructFuncs
+from cfg_constructor_ida import get_cfg_ida
+from discovRe_ida import get_discoverRe_feature
 from raw_graphs import *
-from graph_analysis import *
+from graph_analysis_ida import *
 
-def get_func_cfgs_c(filePath, fileName):
+def get_func_cfgs_ida(filePath, fileName):
 
-    ins = R2Helper(filePath)
-
-    res = ins.calc_cfg_info()
+    funcs = ConstructFuncs(filePath)
 
     raw_cfgs = raw_graphs(fileName)
 
-    for func in res:
-        func_name = func['func_name']
-        cfg = get_cfg(func)
+    for func in funcs:
+        func_name = func['funcname']
+        cfg = get_cfg_ida(func)
         func_f = get_discoverRe_feature(func, cfg)
         raw_g = raw_graph(func_name, cfg, func_f)
         raw_cfgs.append(raw_g)
 
     return raw_cfgs
-

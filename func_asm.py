@@ -1,3 +1,8 @@
+import sys
+import os
+curDir = os.path.dirname(__file__)
+preDir = os.path.abspath(os.path.join(curDir, os.pardir))
+sys.path.append(preDir)
 from read_asm import ConstructFuncs
 from cfg_constructor_asm import get_cfg_asm
 from discovRe_asm import get_discoverRe_feature
