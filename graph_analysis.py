@@ -137,7 +137,7 @@ def getBBstrings(block):
             'bleq','blne','blcs','blcc','blmi','blpl','blvs','blvc','blhi','blls','blge','bllt','blgt','blle','blal',
             'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
             'str', 'mov', 'bl', 'b', 'bx', 'blx'}
-    calls = {}
+    calls = set()
     calls.update(calls_x86)
     calls.update(calls_arm)
 
@@ -162,7 +162,7 @@ def getBBconsts(opcode):
             'blxeq','blxne','blxcs','blxcc','blxmi','blxpl','blxvs','blxvc','blxhi','blxls','blxge','blxlt','blxgt','blxle','blxal',
             'moveq','movne','movcs','movcc','movmi','movpl','movvs','movvc','movhi','movls','movge','movlt','movgt','movle','moval',
             'ldr', 'str', 'mov', 'bl', 'b', 'bx', 'blx'}
-    calls = {}
+    calls = set()
     calls.update(calls_x86)
     calls.update(calls_arm)
 

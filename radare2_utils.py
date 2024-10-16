@@ -20,13 +20,6 @@ import r2pipe
 from contextlib import contextmanager
 import sys
 
-jump_ops = [
-    'jz ', 'jnz ', 'jne ', 'jb ', 'jc ', 'jnb ',
-    'jnc ', 'ja ', 'jnbe ', 'jae ', 'jna ', 'jbe ',
-    'jng ', 'jle ', 'jg ', 'je '
-]
-
-
 @contextmanager
 def make_r2(binary_path):
     r2 = r2pipe.open(binary_path)
@@ -45,7 +38,7 @@ class R2Helper:
         计算被测对象的所有函数首地址、各函数中所有指令地址、函数基本块、控制流图的边、以及call信息四部分
         """
         res = []
-        entryOffset = None
+        entryOffset = 0
         with make_r2(self.file_path) as r2:
             r2.cmd("aaa")
             # 记录所有函数首地址
