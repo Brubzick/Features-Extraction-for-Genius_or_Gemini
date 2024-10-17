@@ -1,10 +1,9 @@
-import sys
 
 def ReadIda(filePath):
     disasmLines = []
-    with open(filePath, 'r', encoding='utf-8') as f:
+    with open(filePath, 'r', encoding='utf-8', errors='ignore') as f:
         for line in f:
-            if line.startswith('.text'):
+            if line.startswith('.text') or line.startswith('__text'):
 
                 sline = line.split()
                 if len(sline) <= 1:
@@ -15,7 +14,8 @@ def ReadIda(filePath):
 
                 if line[-1] == '\n':
                     line = line[:-1]
-                addr = sline[0][6:].lstrip('0')
+                labelEnd = sline[0].index(':')
+                addr = sline[0][labelEnd+1:].lstrip('0')
                 opcode = line[len(sline[0])+1:]
                 disasmLines.append([addr, opcode])
     
