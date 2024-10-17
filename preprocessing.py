@@ -2,8 +2,6 @@
 from func import get_func_cfgs_c
 from func_asm import get_func_cfgs_asm
 from func_disasm import get_func_cfgs_disasm
-# from func_windbg import get_func_cfgs_windbg
-# from func_ida import get_func_cfgs_ida
 import os
 import sys
 import pickle
@@ -29,7 +27,7 @@ if __name__ == '__main__':
 		print('Input path does not exist.')
 		sys.exit(0)
 
-	inputType = args.type # 'bin'或'ida'或'windbg'或'asm', 输入为二进制或汇编码文本
+	inputType = args.type # 'bin'或'disasm'或'asm', 输入为二进制或汇编码文本
 
 	haveOutput = False # 是否成功输出
 
