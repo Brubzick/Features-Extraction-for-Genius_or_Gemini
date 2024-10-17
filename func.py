@@ -2,7 +2,6 @@ from radare2_utils import R2Helper
 from cfg_constructor import get_cfg
 from discovRe import get_discoverRe_feature
 from raw_graphs import *
-from graph_analysis import *
 
 def get_func_cfgs_c(filePath, fileName):
 

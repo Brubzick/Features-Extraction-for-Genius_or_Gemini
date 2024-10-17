@@ -1,8 +1,9 @@
 #coding:utf-8
 from func import get_func_cfgs_c
-from func_ida import get_func_cfgs_ida
-from func_windbg import get_func_cfgs_windbg
 from func_asm import get_func_cfgs_asm
+from func_disasm import get_func_cfgs_disasm
+# from func_windbg import get_func_cfgs_windbg
+# from func_ida import get_func_cfgs_ida
 import os
 import sys
 import pickle
@@ -17,7 +18,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='input parameter')
 	parser.add_argument('--input', '-i', type=str, required=True, help='input file path') # 输入的路径
 	parser.add_argument('--output', '-o', type=str, help='output file path, the same as the input with a \'.cfg\' postfix by default') # 保存ACFG的路径
-	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'bin\' or \'ida\' or \'windbg\' or \'asm\'') # 类型
+	parser.add_argument('--type', '-t', type=str, required=True, help='input type, \'bin\' or \'disasm\' or \'asm\'') # 类型
 
 	args = parser.parse_args()
 
@@ -36,15 +37,10 @@ if __name__ == '__main__':
 	if inputType == 'bin':
 		cfgs = get_func_cfgs_c(filePath, fileName)
 		haveOutput = True
-	
-	# 汇编码，采用ida反汇编结果的文本排列格式。目前仅支持x86
-	elif inputType == 'ida':
-		cfgs = get_func_cfgs_ida(filePath, fileName)
-		haveOutput = True
-	
-	# 汇编码，采用ida反汇编结果的文本排列格式。目前仅支持x86
-	elif inputType == 'windbg':
-		cfgs = get_func_cfgs_windbg(filePath, fileName)
+
+	# 汇编码，IDA或WinDbg的反汇编结果（的文本排列形式），IDA采用的是生成的LST文件
+	elif inputType == 'disasm':
+		cfgs = get_func_cfgs_disasm(filePath, fileName)
 		haveOutput = True
 
 	# 汇编码，gcc或clang的汇编结果，支持x86和arm
@@ -60,8 +56,6 @@ if __name__ == '__main__':
 		print('Wrong type. Use --help to see the parameters.')
 
 	if haveOutput:
-		for cfg in cfgs.raw_graph_list:
-			print(cfg.discovre_features)
 		path = args.output # 保存ACFG的路径
 		if path == None:
 			path = os.path.dirname(filePath)
