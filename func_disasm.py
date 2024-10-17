@@ -3,15 +3,18 @@ from func_windbg import get_func_cfgs_windbg
 from raw_graphs import *
 
 def isIDA(filePath):
-    # 读取前20行，看开头判断是否是IDA的TSL文件
-    with open(filePath, 'r', encoding='utf-8', errors='ignore') as f:
-        i = 20
-        line = f.readline()
-        while i > 0 and line != '':
-            if line[0] != '.':
-                return False
-            i -= 1
+    # 读取前20行，看开头判断是否是IDA的LST文件
+    try:
+        with open(filePath, 'r', encoding='utf-8', errors='ignore') as f:
+            i = 20
             line = f.readline()
+            while i > 0 and line != '':
+                if line[0] != '.':
+                    return False
+                i -= 1
+                line = f.readline()
+            return True
+    except: # LST文件的编码为iso-8859，用utf-8有时会报错
         return True
 
 def get_func_cfgs_disasm(filePath, fileName):

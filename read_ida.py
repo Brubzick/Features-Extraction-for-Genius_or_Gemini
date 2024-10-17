@@ -1,7 +1,7 @@
 
 def ReadIda(filePath):
     disasmLines = []
-    with open(filePath, 'r', encoding='utf-8', errors='ignore') as f:
+    with open(filePath, 'r', encoding='iso-8859-1') as f:
         for line in f:
             if line.startswith('.text') or line.startswith('__text'):
 
