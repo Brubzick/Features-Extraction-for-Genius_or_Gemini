@@ -48,6 +48,6 @@ x86 and arm are supported.
 
 'bin' takes binary as input (x86 or arm).
 
-'disasm' takes IDA (TSL file) or WinDbg disassembly form text as input (x86).
+'disasm' takes IDA (LST file) or WinDbg disassembly form text as input (x86).
 
 'asm' takes assembly form of gcc or clang (gcc -S / clang -S). O0 (default) optimization is preferred (x86 or arm).
