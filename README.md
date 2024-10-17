@@ -23,7 +23,7 @@ ASM_PARSER_OUT_DIR为asm-parser的输出目录，可自定义设置，默认为�
 
 输入类型为 'bin'（二进制）时，使用radare2分析并抽取特征。
 输入类型为 'asm' （汇编码）时，使用gcc或clang的汇编结果（的排列形式的汇编码文本）作为输入（gcc -S / clang -S），最好是O0优化等级的情况（即默认优化等级）。
-输入类型为 'ida'时，使用ida的反汇编结果（的排列形式的汇编码文本）作为输入（ida导出为\color{red}LST文件）。
+输入类型为 'ida'时，使用ida的反汇编结果（的排列形式的汇编码文本）作为输入（ida导出为<font color='red>LST文件</fond>）。
 输入类型为 'windbg'时，使用ida的反汇编结果（的排列形式的汇编码文本）作为输入。
 
 在使用'asm'作为输入时，汇编码首先会经过asm-parser处理（使用python的subprocess库在脚本中执行了shell命令），处理后的汇编码会输出到ASM_PARSER_OUT_DIR设置的目录，然后该输出会作为输入继续处理并提取特征。
