@@ -58,12 +58,18 @@ def Split2Functions(lines):
     end = 0
     funcname = ''
 
+    firstLine = lines[0]
+    if firstLine[0] != ' ' and firstLine[-1] == ':':
+        sF = firstLine.split()
+        funcname = sF[0]
+
     for i in range(1, len(lines)):
         line = lines[i]
         # 如果有基本块的头,则不管
         if line[0] != ' ' and line[-1] == ':':
             sline = line.split()
             name = sline[0]
+            print(name, funcname)
             if len(name) > len(funcname):
                 if name[:len(funcname)] == funcname  and name[len(funcname)] == '+':
                     continue
