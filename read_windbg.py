@@ -9,6 +9,8 @@ def ReadWindbg(filePath):
                 line = line[:-1]
             if line == '':
                 continue
+            if (line[0] == ' ' or line[-1] != ':') and len(sline[0]) != 8 and (len(sline[0]) != 17 or ('`' not in sline[0])) and (line[0] != ' ' or (not sline[0].isdigit())):
+                continue # 不是指令内容
             
             if line[0] == ' ' and sline[0].isdigit():
                 i = line.index(sline[1])
