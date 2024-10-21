@@ -69,7 +69,6 @@ def Split2Functions(lines):
         if line[0] != ' ' and line[-1] == ':':
             sline = line.split()
             name = sline[0]
-            print(name, funcname)
             if len(name) > len(funcname):
                 if name[:len(funcname)] == funcname  and name[len(funcname)] == '+':
                     continue
