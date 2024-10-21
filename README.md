@@ -20,7 +20,7 @@ ASM_PARSER_OUT_DIR为asm-parser的输出目录，可自定义设置，默认为�
 -o/--output 为输出的文件路径，非必需，默认为输入的文件路径加'.cfg'后缀。
 
 对于bin和asm，支持x86和arm架构
-对于disasm，目前只支持x86架构
+对于ida或windbg，目前只支持x86架构
 
 输入类型为 'bin'（二进制）时，使用radare2分析并抽取特征。
 输入类型为 'asm' （汇编码）时，使用gcc或clang的汇编结果（的排列形式的汇编码文本）作为输入（gcc -S / clang -S），最好是O0优化等级的情况（即默认优化等级）。

@@ -28,7 +28,7 @@ if __name__ == '__main__':
 		print('Input path does not exist.')
 		sys.exit(0)
 
-	inputType = args.type # 'bin'或'disasm'或'asm', 输入为二进制或汇编码文本
+	inputType = args.type # 'bin'或'ida'或'windbg'或'asm', 输入为二进制或汇编码文本
 
 	haveOutput = False # 是否成功输出
 
