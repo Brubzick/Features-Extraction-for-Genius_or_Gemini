@@ -16,7 +16,7 @@ def ReadIda_asm(filePath):
                 continue
 
             if line[-1] == '\n':
-                line = line[:-1].lstrip(' ')
+                line = line[:-1]
 
             lines.append(line)
 
