@@ -1,36 +1,35 @@
 
-def ReadIda(filePath):
-    disasmLines = []
+def ReadIda_asm(filePath):
+    lines = []
     with open(filePath, 'r', encoding='iso-8859-1') as f:
         for line in f:
-            if line.startswith('.text') or line.startswith('__text'):
+            if line.startswith('; Segment type: Pure code'):
+                lines = []
+            elif line.startswith('_text ends') or line.startswith('__text ends'):
+                break
 
-                sline = line.split()
-                if len(sline) <= 1:
-                    continue
-                tmp = sline[1]
-                if tmp == ';' or tmp == 'align' or tmp == 'public':
-                    continue
+            sline = line.split()
+            if len(sline) < 1:
+                continue
+            tmp = sline[0]
+            if tmp == ';' or tmp == 'align' or tmp == 'public':
+                continue
 
-                if line[-1] == '\n':
-                    line = line[:-1]
-                labelEnd = sline[0].index(':')
-                addr = sline[0][labelEnd+1:].lstrip('0')
-                opcode = line[len(sline[0])+1:].lstrip(' ')
-                disasmLines.append([addr, opcode])
-    
-    return disasmLines
+            if line[-1] == '\n':
+                line = line[:-1].lstrip(' ')
 
-def isFunctionStart(line):
-    opcode = line[1]
+            lines.append(line)
+
+    return lines
+
+def isFunctionStart(opcode):
     sopcode = opcode.split() 
     if len(sopcode) > 1:
         if sopcode[1] == 'proc': # 函数的开头
             return True
     return False
 
-def isFunctionEnd(line):
-    opcode = line[1]
+def isFunctionEnd(opcode):
     sopcode = opcode.split() 
     if len(sopcode) > 1:
         if sopcode[1] == 'endp': # 函数的结尾
@@ -71,19 +70,19 @@ def Split2BBlocks(disasmLines, funcRange):
     start = funcRange[0]
     end = funcRange[1]
 
-    offset = disasmLines[start][0]
-    funcHead = disasmLines[start][1].split()
+    funcHead = disasmLines[start].split()
     funcname = funcHead[0]
 
     # 到开始位置
     for i in range(start+1, len(disasmLines)):
-        opcode = disasmLines[i][1]
-        sopcode = opcode.split()
-        if (not isFunctionStart(opcode)) and sopcode[0][-1] != '=':
+        opcode = disasmLines[i].split()
+        if opcode[0][-1] == '=':
+            continue
+        else:
             start = i
             break
     
-    func = {'funcname': funcname, 'offset':offset}
+    func = {'funcname': funcname}
     
     blocks = []
     block = {'bName': '', 'id': start}
@@ -91,9 +90,8 @@ def Split2BBlocks(disasmLines, funcRange):
     bStart = start
     bEnd = start
     for i in range(start, end):
-        opcode = disasmLines[i][1]
-        addr = disasmLines[i][0]
-        if isBlockEnd(opcode, disasmLines[i-1][1]):
+        opcode = disasmLines[i]
+        if isBlockEnd(opcode, disasmLines[i-1]):
             bEnd = i
             block['bRange'] = (bStart, bEnd) # 不包括bEnd
             blocks.append(block)
@@ -103,7 +101,7 @@ def Split2BBlocks(disasmLines, funcRange):
                 sopcode = opcode.split()
                 bName = sopcode[0][:-1]
                 block = {'bName': bName, 'id': i+1}
-                name2addr[bName] = addr
+                name2addr[bName] = i+1
                 bStart = i+1
             else:
                 block = {'bName': '', 'id': i}
@@ -117,8 +115,8 @@ def Split2BBlocks(disasmLines, funcRange):
     func['name2addr'] = name2addr
     return func
 
-def ConstructFuncs(filePath):
-    disasmLines = ReadIda(filePath)
+def ConstructFuncs_asm(filePath):
+    disasmLines = ReadIda_asm(filePath)
     funcRanges = Split2Functions(disasmLines)
     funcs = []
     allFuncNames = set()
@@ -145,12 +143,11 @@ def ConstructFuncs(filePath):
             start = b['bRange'][0]
             end = b['bRange'][1]
             block = []
-            blockLines = disasmLines[start:end]
 
-            for line in blockLines:
-                opcode = line[1]
+            for i in range(start, end):
+                opcode = disasmLines[i]
                 inst = opcode.split()
-                addr = line[0]
+                addr = i
 
                 # 记录调用被调用
                 if inst[0] in calls:
@@ -176,7 +173,6 @@ def ConstructFuncs(filePath):
             conFunc['bb_addr_list'] = bb_addr_list
             conFunc['call'] = call
             conFunc['bName2addr'] = func['name2addr']
-            conFunc['offset'] = func['offset']
 
             conFuncs.append(conFunc)
 
@@ -227,7 +223,6 @@ def ConstructFuncs(filePath):
     '''
     conFunc的keys:
     funcname
-    offset
     blocks
     bb_addr_list
     call
@@ -235,30 +230,3 @@ def ConstructFuncs(filePath):
     edges
     '''
 
-
-# def ReadIda_arm(filePath):
-#     disasmLines = []
-#     with open(filePath, 'r', encoding='iso-8859-1') as f:
-#         for line in f:
-#             if line.startswith('.text') or line.startswith('__text'):
-#                 sline = line.split()
-
-#                 if len(sline) <= 1:
-#                     continue
-                
-#                 tmp = sline[1]
-#                 if tmp == ';':
-#                     opPart = ' '.join(sline[1:])
-#                     if not (opPart.startswith('; End of function') or opPart.startswith('; =============== S U B R O U T I N E =')):
-#                         continue
-#                 elif tmp.startswith('off_') or tmp.startswith('var_') or tmp == 'EXPORT':
-#                     continue
-
-#                 if line[-1] == '\n':
-#                     line = line[:-1]
-#                 labelEnd = sline[0].index(':')
-#                 addr = sline[0][labelEnd+1:].lstrip('0')
-#                 opcode = line[len(sline[0])+1:]
-#                 disasmLines.append([addr, opcode])
-    
-#     return disasmLines
