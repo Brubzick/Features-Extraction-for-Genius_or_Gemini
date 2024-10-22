@@ -234,31 +234,3 @@ def ConstructFuncs(filePath):
     called
     edges
     '''
-
-
-# def ReadIda_arm(filePath):
-#     disasmLines = []
-#     with open(filePath, 'r', encoding='iso-8859-1') as f:
-#         for line in f:
-#             if line.startswith('.text') or line.startswith('__text'):
-#                 sline = line.split()
-
-#                 if len(sline) <= 1:
-#                     continue
-                
-#                 tmp = sline[1]
-#                 if tmp == ';':
-#                     opPart = ' '.join(sline[1:])
-#                     if not (opPart.startswith('; End of function') or opPart.startswith('; =============== S U B R O U T I N E =')):
-#                         continue
-#                 elif tmp.startswith('off_') or tmp.startswith('var_') or tmp == 'EXPORT':
-#                     continue
-
-#                 if line[-1] == '\n':
-#                     line = line[:-1]
-#                 labelEnd = sline[0].index(':')
-#                 addr = sline[0][labelEnd+1:].lstrip('0')
-#                 opcode = line[len(sline[0])+1:]
-#                 disasmLines.append([addr, opcode])
-    
-#     return disasmLines

@@ -1,23 +1,25 @@
 
 def ReadIda_asm(filePath):
     lines = []
-    with open(filePath, 'r', encoding='iso-8859-1') as f:
+    with open(filePath, 'r', encoding='iso-8859-1') as f: 
         for line in f:
-            if line.startswith('; Segment type: Pure code'):
-                lines = []
-            elif line.startswith('_text ends') or line.startswith('__text ends'):
-                break
-
             sline = line.split()
             if len(sline) < 1:
                 continue
+            if line.startswith('; Segment type: Pure code'):
+                lines = []
+            else:
+                if len(sline) >= 2:
+                    if (sline[0] == '_text' or sline[0] == '__text') and sline[1] == 'ends':
+                        break
+            
             tmp = sline[0]
             if tmp == ';' or tmp == 'align' or tmp == 'public':
                 continue
 
             if line[-1] == '\n':
                 line = line[:-1]
-
+            line = line.lstrip(' ')
             lines.append(line)
 
     return lines
@@ -36,22 +38,22 @@ def isFunctionEnd(opcode):
             return True
     return False
 
-def Split2Functions(disasmLines):
+def Split2Functions(lines):
     funcRanges = []
     start = 0
     end = 0
 
     # 移到第一个函数的开头
-    for i in range(len(disasmLines)):
-        line = disasmLines[i]
+    for i in range(len(lines)):
+        line = lines[i]
         if isFunctionStart(line):
             start = i
             end = i
             break
 
     # 遍历函数
-    for i in range(start, len(disasmLines)):
-        line = disasmLines[i]
+    for i in range(start, len(lines)):
+        line = lines[i]
         if isFunctionStart(line):
             start = i
         elif isFunctionEnd(line):
@@ -66,16 +68,16 @@ def isBlockEnd(opcode, prevOpcode):
     sprevOpcode = prevOpcode.split()
     return (opcode.startswith('loc') and sopcode[0][-1] == ':') or ((not isFunctionStart(prevOpcode)) and (sprevOpcode[0][0] == 'j' or (sprevOpcode[0].startswith('ret'))))
 
-def Split2BBlocks(disasmLines, funcRange):
+def Split2BBlocks(lines, funcRange):
     start = funcRange[0]
     end = funcRange[1]
 
-    funcHead = disasmLines[start].split()
+    funcHead = lines[start].split()
     funcname = funcHead[0]
 
     # 到开始位置
-    for i in range(start+1, len(disasmLines)):
-        opcode = disasmLines[i].split()
+    for i in range(start+1, len(lines)):
+        opcode = lines[i].split()
         if opcode[0][-1] == '=':
             continue
         else:
@@ -90,8 +92,8 @@ def Split2BBlocks(disasmLines, funcRange):
     bStart = start
     bEnd = start
     for i in range(start, end):
-        opcode = disasmLines[i]
-        if isBlockEnd(opcode, disasmLines[i-1]):
+        opcode = lines[i]
+        if isBlockEnd(opcode, lines[i-1]):
             bEnd = i
             block['bRange'] = (bStart, bEnd) # 不包括bEnd
             blocks.append(block)
@@ -116,12 +118,12 @@ def Split2BBlocks(disasmLines, funcRange):
     return func
 
 def ConstructFuncs_asm(filePath):
-    disasmLines = ReadIda_asm(filePath)
-    funcRanges = Split2Functions(disasmLines)
+    lines = ReadIda_asm(filePath)
+    funcRanges = Split2Functions(lines)
     funcs = []
     allFuncNames = set()
     for fRange in funcRanges:
-        func = Split2BBlocks(disasmLines, fRange)
+        func = Split2BBlocks(lines, fRange)
         funcs.append(func)
         allFuncNames.add(func['funcname'])
     
@@ -145,7 +147,7 @@ def ConstructFuncs_asm(filePath):
             block = []
 
             for i in range(start, end):
-                opcode = disasmLines[i]
+                opcode = lines[i]
                 inst = opcode.split()
                 addr = i
 
@@ -230,3 +232,31 @@ def ConstructFuncs_asm(filePath):
     edges
     '''
 
+# arm的部分
+def ReadIda_arm(filePath):
+    lines = []
+    with open(filePath, 'r', encoding='iso-8859-1') as f:
+        for line in f:
+            line = line.lstrip(' ')
+            if line.startswith('; Segment type: Pure code'):
+                lines = []
+            elif line.startswith('; .text         ends'):
+                break
+
+            sline = line.split()
+            if len(sline) <= 1:
+                continue
+            
+            tmp = sline[0]
+            if tmp == ';':
+                opPart = ' '.join(sline[1:])
+                if not (opPart.startswith('; End of function') or opPart.startswith('; =============== S U B R O U T I N E =')):
+                    continue
+            elif tmp.startswith('off_') or tmp == 'EXPORT':
+                continue
+
+            if line[-1] == '\n':
+                line = line[:-1]
+            lines.append(line)
+    
+    return lines
